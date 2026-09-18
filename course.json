@@ -1,0 +1,7 @@
+{
+  "identifier": "ku-gribnaya-lineyka-2026",
+  "title": "Грибная линейка",
+  "audience": "griby",
+  "direction": "",
+  "_comment": "Метаданные курса. identifier и title попадают в imsmanifest.xml при упаковке (tools/scorm_pack.py). Не переименовывать файл."
+}

@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<!-- ═══════════════════════════════════════════════════════════════════════
+  КУРС «ГРИБНАЯ ЛИНЕЙКА» (Белые грибы, 2026) · собран на ДС KU
+  Структура: обложка (home) → Ингредиенты → Приготовление → Тренажёр →
+  финал. «Приготовление» — одна глава с четырьмя подглавами-блюдами
+  (Ангус, Биг Кинг, Пита, Воппер): видео сборки, шпаргалка и упаковка. Палитра — трек data-audience="griby".
+
+  ГДЕ ЧТО МЕНЯТЬ
+  • Видео: атрибут data-video-src="…ссылка для iframe…" у .gb-video__frame.
+  • Картинки и промты: js/gb-assets.js (+ assets/PROMPTS.md).
+  • Ингредиенты: фото и ролики — assets/ingredients/ (webp и mp4 без звука).
+  • 3D-упаковка: assets/3d/*.glb.js (кламшелл, ролл, коробка Биг Кинг;
+    пересборка — blender/README.md), логика — js/gb-pack3d.js.
+  • Тренажёры: js/gb-cook.js (Повар), js/gb-cashier.js (Кассир).
+  • Не переименовывай data-ku-id / data-ku-var — у учеников слетит прогресс.
+═══════════════════════════════════════════════════════════════════════ -->
+<html lang="ru" data-audience="griby" data-ku-course="ku-gribnaya-lineyka-2026">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Грибная линейка · Белые грибы</title>
+  <meta name="theme-color" content="#f6ecdc">
+  <link rel="stylesheet" href="css/kuds.css">
+  <link rel="stylesheet" href="css/course.css">
+</head>
+<body>
+
+<!-- Спрайт иконок (Lucide, ISC) + собственная иконка гриба в том же стиле -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="i-mushroom" viewBox="0 0 24 24"><path d="M3 12a9 8 0 0 1 18 0z"/><path d="M9 12v5a3 3 0 0 0 6 0v-5"/><path d="M8 7.5h.01M13 5.5h.01M16 8.5h.01"/></symbol>
+  <symbol id="i-right" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+  <symbol id="i-left" viewBox="0 0 24 24"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></symbol>
+  <symbol id="i-up" viewBox="0 0 24 24"><path d="m5 12 7-7 7 7"/><path d="M12 19V5"/></symbol>
+  <symbol id="i-down" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
+  <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></symbol>
+  <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M10 14.66v1.626a2 2 0 0 1-.976 1.696A5 5 0 0 0 7 21.978"/><path d="M14 14.66v1.626a2 2 0 0 0 .976 1.696A5 5 0 0 1 17 21.978"/><path d="M18 9h1.5a1 1 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z"/><path d="M6 9H4.5a1 1 0 0 1 0-5H6"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 15V3"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></symbol>
+  <symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/><path d="M20 2v4"/><path d="M22 4h-4"/><circle cx="4" cy="20" r="2"/></symbol>
+  <symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" x2="12" y1="8" y2="12"/><line x1="12" x2="12.01" y1="16" y2="16"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M5 5a2 2 0 0 1 3.008-1.728l11.997 6.998a2 2 0 0 1 .003 3.458l-12 7A2 2 0 0 1 5 19z"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></symbol>
+  <symbol id="i-utensils" viewBox="0 0 24 24"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"/><path d="M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/></symbol>
+  <symbol id="i-bag" viewBox="0 0 24 24"><path d="M16 10a4 4 0 0 1-8 0"/><path d="M3.103 6.034h17.794"/><path d="M3.4 5.467a2 2 0 0 0-.4 1.2V20a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6.667a2 2 0 0 0-.4-1.2l-2-2.667A2 2 0 0 0 17 2H7a2 2 0 0 0-1.6.8z"/></symbol>
+  <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><path d="M16 3.128a4 4 0 0 1 0 7.744"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><circle cx="9" cy="7" r="4"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></symbol>
+  <symbol id="i-rotate" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></symbol>
+  <symbol id="i-zoom" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/><path d="M11 8v6"/><path d="M8 11h6"/></symbol>
+  <symbol id="i-scale" viewBox="0 0 24 24"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></symbol>
+  <symbol id="i-layers" viewBox="0 0 24 24"><path d="M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z"/><path d="M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12"/><path d="M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17"/></symbol>
+  <symbol id="i-package" viewBox="0 0 24 24"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><path d="m3.3 7 7.703 4.734a2 2 0 0 0 1.994 0L20.7 7"/><path d="m7.5 4.27 9 5.15"/></symbol>
+  <symbol id="i-move" viewBox="0 0 24 24"><path d="M12 2v20"/><path d="m15 19-3 3-3-3"/><path d="m19 9 3 3-3 3"/><path d="M2 12h20"/><path d="m5 9-3 3 3 3"/><path d="m9 5 3-3 3 3"/></symbol>
+  <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+  <symbol id="i-droplet" viewBox="0 0 24 24"><path d="M12 22a7 7 0 0 0 7-7c0-2-1-3.9-3-5.5s-3.5-4-4-6.5c-.5 2.5-2 4.9-4 6.5C6 11.1 5 13 5 15a7 7 0 0 0 7 7z"/></symbol>
+  <symbol id="i-list-ordered" viewBox="0 0 24 24"><path d="M10 12h11"/><path d="M10 18h11"/><path d="M10 6h11"/><path d="M4 10h2"/><path d="M4 6h1v4"/><path d="M6 18H4c0-1 2-2 2-3s-1-1.5-2-1"/></symbol>
+  <symbol id="i-tag" viewBox="0 0 24 24"><path d="M12.586 2.586A2 2 0 0 0 11.172 2H4a2 2 0 0 0-2 2v7.172a2 2 0 0 0 .586 1.414l8.704 8.704a2.426 2.426 0 0 0 3.42 0l6.58-6.58a2.426 2.426 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5"/></symbol>
+  <symbol id="i-snowflake" viewBox="0 0 24 24"><path d="M2 12h20"/><path d="M12 2v20"/><path d="m20 16-4-4 4-4"/><path d="m4 8 4 4-4 4"/><path d="m16 4-4 4-4-4"/><path d="m8 20 4-4 4 4"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></symbol>
+</defs></svg>
+
+<!-- ═══ ШАПКА С ПРОГРЕССОМ ═══ -->
+<header class="ku-topbar">
+  <div class="ku-topbar__inner">
+    <button class="ku-topbar__brand" onclick="kuNavigate('home')" style="cursor:pointer"><svg class="ku-ico gb-brand-ico"><use href="#i-mushroom"/></svg> Грибная линейка</button>
+    <div class="ku-topbar__spacer"></div>
+    <span class="ku-progress__count" id="ku-course-count"></span>
+  </div>
+  <div class="ku-progress"><div class="ku-progress__bar" id="ku-course-bar"></div></div>
+</header>
+
+<!-- Поля-носители переменных для сводки (заполняет js/gb-course.js) -->
+<input type="hidden" data-ku-var="position" data-ku-label="Должность">
+<input type="hidden" data-ku-var="role" data-ku-label="Роль в ресторане">
+<input type="hidden" data-ku-var="cook-result" data-ku-label="Тренажёр «Повар», лучший результат">
+<input type="hidden" data-ku-var="cashier-result" data-ku-label="Тренажёр «Кассир», лучший результат">
+
+<main data-ku-course-nav data-ku-chapters="ingredients,cooking,trainer">
+
+  <!-- ═══════════════════════ ОБЛОЖКА ═══════════════════════ -->
+
+  <!-- ═══════════════════════ ОБЛОЖКА ═══════════════════════ -->
+  <div class="ku-page active" id="ku-page-home">
+    <section class="gb-hero">
+      <div class="gb-hero__glow"></div>
+      <div class="gb-spores" data-count="18"></div>
+      <span class="ku-bk-logo" role="img" aria-label="Burger King"></span>
+
+      <!-- Параллакс-слои: --d — скорость по скроллу, --dx/--dy — по курсору -->
+      <div class="gb-layer" style="right:-4%;bottom:-6%;width:clamp(12rem,34vw,26rem);--d:-0.18;--dx:-18;--dy:-10"><div class="gb-float slow" data-deco="porcini"></div></div>
+      <div class="gb-layer" style="right:27%;bottom:6%;width:clamp(5rem,11vw,9rem);--d:-0.32;--dx:-30;--dy:-16"><div class="gb-float rev" data-deco="porcini|var(--ku__rust-500)"></div></div>
+      <div class="gb-layer" style="right:8%;top:14%;width:clamp(4rem,8vw,7rem);--d:0.22;--dx:24;--dy:14;transform-origin:center"><div class="gb-float" data-deco="leaf" style="rotate:-28deg"></div></div>
+      <div class="gb-layer" style="left:44%;top:8%;width:clamp(3rem,5vw,4.5rem);--d:0.35;--dx:32;--dy:20"><div class="gb-float rev" data-deco="oak|var(--ku__rust-400)" style="rotate:34deg"></div></div>
+      <div class="gb-layer" style="left:-2%;bottom:4%;width:clamp(3.5rem,7vw,6rem);--d:0.12;--dx:14;--dy:10"><div class="gb-float slow" data-deco="leaf|var(--ku__cap-400)" style="rotate:150deg"></div></div>
+
+      <div class="ku-wrap gb-hero__content">
+        <div class="ku-hero-row">
+          <div>
+            <span class="ku-eyebrow"><svg class="ku-ico s"><use href="#i-mushroom"/></svg> Сезон · Белые грибы</span>
+            <div class="ku-space s"></div>
+            <h1 class="ku-display gb-hero__title">Грибная <span class="ku-flame-text">линейка</span></h1>
+            <div class="ku-space s"></div>
+            <p class="ku-lead">Три блюда с белыми грибами, новая упаковка для Воппера и тренажёр, в котором можно собрать и выдать заказ до первой смены.</p>
+            <div class="ku-space m"></div>
+            <div class="ku-row">
+              <button class="ku-btn primary l" id="gb-start" onclick="document.getElementById('gb-who').scrollIntoView({behavior:'smooth'})">Начать курс <svg class="ku-ico arrow"><use href="#i-right"/></svg></button>
+              <div class="gb-hero__meta">
+                <span class="ku-badge neutral"><svg class="ku-ico s"><use href="#i-layers"/></svg> 3 главы</span>
+                <span class="ku-badge neutral"><svg class="ku-ico s"><use href="#i-target"/></svg> Тренажёр под твою роль</span>
+              </div>
+            </div>
+          </div>
+          <div class="gb-slot bare" data-asset="hero" style="width:min(30vw,24rem);flex-shrink:0;background:transparent" data-hero-slot></div>
+        </div>
+      </div>
+      <a class="gb-hero__scroll" href="#gb-contents" onclick="document.getElementById('gb-contents').scrollIntoView({behavior:'smooth'});return false">
+        <span>Что в курсе</span><svg class="ku-ico s"><use href="#i-down"/></svg>
+      </a>
+    </section>
+
+    <!-- Кто проходит курс: от должности зависят главы и тренажёр -->
+    <section class="ku-section gb-bg" id="gb-who">
+      <div class="ku-wrap measure">
+        <h2 class="ku-h2 ku-center">Кто ты в ресторане?</h2>
+        <div class="ku-space s"></div>
+        <p class="ku-lead ku-center">От должности зависит, какие главы откроются и какой тренажёр ты пройдёшь.</p>
+        <div class="ku-space m"></div>
+        <div class="gb-who" id="gb-who-pos">
+          <button class="ku-card hover-lift gb-role" data-pos="aup" aria-pressed="false">
+            <span class="ku-icon-badge solid"><svg class="ku-ico"><use href="#i-users"/></svg></span>
+            <h3>АУП</h3>
+            <p>Менеджер, директор или заместитель директора.</p>
+          </button>
+          <button class="ku-card hover-lift gb-role" data-pos="crew" aria-pressed="false">
+            <span class="ku-icon-badge solid"><svg class="ku-ico"><use href="#i-utensils"/></svg></span>
+            <h3>Член бригады</h3>
+            <p>Работаешь на кухне или на кассе.</p>
+          </button>
+        </div>
+
+        <div class="ku-space m"></div>
+        <div id="gb-who-role" hidden>
+          <h3 class="ku-h3 ku-center">На какой позиции работаешь?</h3>
+          <div class="ku-space s"></div>
+          <div class="gb-who">
+            <button class="ku-card hover-lift gb-role" data-role="cook" aria-pressed="false">
+              <span class="ku-icon-badge solid"><svg class="ku-ico"><use href="#i-utensils"/></svg></span>
+              <h3>Повар</h3>
+              <p>Собираешь и упаковываешь блюда.</p>
+            </button>
+            <button class="ku-card hover-lift gb-role" data-role="cashier" aria-pressed="false">
+              <span class="ku-icon-badge solid"><svg class="ku-ico"><use href="#i-bag"/></svg></span>
+              <h3>Кассир</h3>
+              <p>Проверяешь маркировку и отдаёшь заказы гостям.</p>
+            </button>
+            <button class="ku-card hover-lift gb-role" data-role="universal" aria-pressed="false">
+              <span class="ku-icon-badge solid"><svg class="ku-ico"><use href="#i-users"/></svg></span>
+              <h3>Универсал</h3>
+              <p>И кухня, и касса — пройдёшь оба тренажёра.</p>
+            </button>
+          </div>
+        </div>
+        <div class="ku-space s"></div>
+        <p class="ku-caption ku-center" id="gb-who-note">Выбери должность — ниже появится список глав.</p>
+      </div>
+    </section>
+
+    <section class="ku-section gb-bg" id="gb-contents" hidden>
+      <div class="ku-wrap">
+        <h2 class="ku-h2 ku-reveal">Что в курсе</h2>
+        <div class="ku-space m"></div>
+        <div class="gb-chapters gb-chapters--3">
+          <button class="ku-card hover-lift gb-chapter-card ku-reveal" style="--d:1" id="ku-home-card-1" data-chapter="ingredients" onclick="kuNavigate('ingredients')">
+            <span class="ku-lock-badge"><svg class="ku-ico s"><use href="#i-lock"/></svg></span>
+            <span class="gb-done-badge"><svg class="ku-ico s"><use href="#i-check"/></svg> Пройдено</span>
+            <div class="gb-chapter-card__art" data-cardart="ingredients"></div>
+            <div class="gb-chapter-card__body">
+              <span class="gb-chapter-card__num">Глава 1</span>
+              <h3>Ингредиенты</h3>
+              <p>Соус и грибы: где работают, сколько хранятся и как разогреть грибы перед выкладкой на борт.</p>
+            </div>
+          </button>
+          <button class="ku-card hover-lift gb-chapter-card locked ku-reveal" style="--d:2" id="ku-home-card-2" data-chapter="cooking" onclick="kuNavigate('cooking')">
+            <span class="ku-lock-badge"><svg class="ku-ico s"><use href="#i-lock"/></svg></span>
+            <span class="gb-done-badge"><svg class="ku-ico s"><use href="#i-check"/></svg> Пройдено</span>
+            <div class="gb-chapter-card__art" data-cardart="cooking"></div>
+            <div class="gb-chapter-card__body">
+              <span class="gb-chapter-card__num">Глава 2</span>
+              <h3>Приготовление</h3>
+              <p>Четыре блюда: Ангус, Биг Кинг, Пита и Воппер. Видео сборки, шпаргалки и упаковка каждого.</p>
+            </div>
+          </button>
+          <button class="ku-card hover-lift gb-chapter-card locked ku-reveal" style="--d:3" id="ku-home-card-3" data-chapter="trainer" onclick="kuNavigate('trainer')">
+            <span class="ku-lock-badge"><svg class="ku-ico s"><use href="#i-lock"/></svg></span>
+            <span class="gb-done-badge"><svg class="ku-ico s"><use href="#i-check"/></svg> Пройдено</span>
+            <div class="gb-chapter-card__art" data-cardart="trainer"></div>
+            <div class="gb-chapter-card__body">
+              <span class="gb-chapter-card__num">Глава 3</span>
+              <h3>Тренажёр</h3>
+              <p>Повар собирает и упаковывает заказы, кассир проверяет маркировку. Универсал проходит оба.</p>
+            </div>
+          </button>
+        </div>
+        <div class="ku-space m"></div>
+        <div class="ku-row center" id="gb-home-finish" hidden>
+          <button class="ku-btn primary l" onclick="kuNavigate('finish')"><svg class="ku-ico"><use href="#i-trophy"/></svg> К завершению курса</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ═══════════════════════ ГЛАВА 1 · ИНГРЕДИЕНТЫ ═══════════════════════ -->
+  <div class="ku-page" id="ku-page-ingredients">
+    <header class="gb-chapter-head">
+      <div class="gb-spores" data-count="8"></div>
+      <div class="gb-layer" style="right:4%;bottom:-18%;width:clamp(7rem,15vw,11rem);--d:-0.2;--dx:-14;--dy:-8"><div class="gb-float slow" data-deco="porcini|var(--ku__cap-500)"></div></div>
+      <div class="gb-layer" style="right:23%;top:12%;width:clamp(3rem,6vw,5rem);--d:0.25;--dx:20;--dy:12"><div class="gb-float rev" data-deco="oak|var(--ku__rust-400)" style="rotate:-16deg"></div></div>
+      <div class="ku-wrap ku-section tight">
+        <button class="ku-btn ghost" onclick="kuNavigate('home')"><svg class="ku-ico"><use href="#i-home"/></svg> К оглавлению</button>
+        <div class="ku-space m"></div>
+        <span class="ku-eyebrow" data-chapter-num="ingredients">Глава 1</span>
+        <div class="ku-space s"></div>
+        <h2 class="ku-h1">Ингредиенты</h2>
+        <div class="ku-space s"></div>
+        <p class="ku-lead">В линейке два новых ингредиента: соус Белые грибы и сами грибы. Разберём, в чём работает соус, сколько хранятся оба ингредиента и как разогреть грибы перед выкладкой на борт.</p>
+      </div>
+    </header>
+
+    <!-- ── Соус ─────────────────────────────────────────────────────────── -->
+    <section class="ku-section tight gb-bg" aria-labelledby="gb-ingr-sauce">
+      <div class="ku-wrap">
+        <span class="ku-eyebrow"><svg class="ku-ico s"><use href="#i-droplet"/></svg> Соус</span>
+        <div class="ku-space s"></div>
+        <h3 class="ku-h2" id="gb-ingr-sauce">Соус Белые грибы</h3>
+        <div class="ku-space s"></div>
+        <p class="ku-lead">Соус готовят по тем же правилам, что и другие соусы, — по стандартам качества продукции.</p>
+        <div class="ku-space m"></div>
+
+        <div class="ku-grid cols-3 gb-rules">
+          <div class="ku-card gb-rule ku-reveal" style="--d:1">
+            <span class="ku-icon-badge solid"><svg class="ku-ico"><use href="#i-droplet"/></svg></span>
+            <h4>Чистый и сухой инвентарь</h4>
+            <p>Тубу собирай только из чистых и сухих деталей.</p>
+          </div>
+          <div class="ku-card gb-rule ku-reveal" style="--d:2">
+            <span class="ku-icon-badge solid"><svg class="ku-ico"><use href="#i-list-ordered"/></svg></span>
+            <h4>FIFO</h4>
+            <p>«Первым пришёл — первым ушёл»: сначала в работу идёт соус, который приготовили раньше.</p>
+          </div>
+          <div class="ku-card gb-rule ku-reveal" style="--d:3">
+            <span class="ku-icon-badge solid"><svg class="ku-ico"><use href="#i-tag"/></svg></span>
+            <h4>Маркировка</h4>
+            <p>На сливсе и на тубе — наклейка со временем приготовления и сроком годности.</p>
+          </div>
+        </div>
+        <div class="ku-space s"></div>
+        <div class="ku-callout ku-reveal" style="background:var(--ku-card)">
+          <span class="ku-callout__icon"><svg class="ku-ico l"><use href="#i-info"/></svg></span>
+          <div><div class="ku-callout__title">Остались вопросы?</div><p>Если что-то не получается, открой алерт «Маркировка продукта сроком годности».</p></div>
+        </div>
+
+        <div class="ku-space l"></div>
+        <div class="gb-split ku-reveal">
+          <div class="gb-slot gb-split__media" data-asset="ingr-sauce-gun"></div>
+          <div class="gb-split__text">
+            <h3 class="ku-h3">Туба, пистолет и наклейка</h3>
+            <p>Соус Белые грибы работает в тубе и пистолете-дозаторе с жёлтой ручкой <b>1/4 Z</b>. Туба вставляется в держатель пистолета.</p>
+            <p class="ku-caption" style="margin:0 0 .5em">Туба в разобранном виде:</p>
+            <div class="gb-parts"><span>Крышка-дно</span><span>Крышка-носик</span><span>Диффузор</span></div>
+            <p style="margin-top:1em">Чтобы не перепутать соусы, наклей «Белые грибы» на подставку и на пистолет.</p>
+            <div class="gb-must">
+              <div class="gb-must__row is-must"><svg class="ku-ico s"><use href="#i-check"/></svg><span><b>Обязательно</b> — подставка и пистолет</span></div>
+              <div class="gb-must__row"><svg class="ku-ico s"><use href="#i-info"/></svg><span><b>По желанию</b> — туба</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ku-space l"></div>
+        <h3 class="ku-h3 ku-reveal">Сколько хранится соус</h3>
+        <div class="ku-space s"></div>
+        <div class="ku-grid cols-2 gb-shelf">
+          <figure class="ku-card gb-shelf__card ku-reveal" style="--d:1">
+            <img style="object-position:50% 72%" src="assets/ingredients/sauce-sliv.webp" alt="Сливс соуса Белые грибы с наклейкой маркировки" loading="lazy" decoding="async">
+            <figcaption>
+              <span class="gb-shelf__num">72&nbsp;ч</span>
+              <span class="gb-shelf__label"><b>Вскрытый сливс</b> — в холодильной камере</span>
+            </figcaption>
+          </figure>
+          <figure class="ku-card gb-shelf__card ku-reveal" style="--d:2">
+            <img src="assets/ingredients/sauce-tube.webp" alt="Туба с соусом Белые грибы и наклейкой: подготовлен 04.08 в 13:00, готов с 14:00, годен до 05.08 13:00" loading="lazy" decoding="async">
+            <figcaption>
+              <span class="gb-shelf__num">24&nbsp;ч</span>
+              <span class="gb-shelf__label"><b>В тубе при комнатной температуре</b> — вместе с часом выдержки. На фото: подготовили в 13:00, в работе с 14:00, годен до 13:00 следующего дня.</span>
+            </figcaption>
+          </figure>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Грибы ────────────────────────────────────────────────────────── -->
+    <section class="ku-section tight" aria-labelledby="gb-ingr-mush">
+      <div class="ku-wrap">
+        <span class="ku-eyebrow"><svg class="ku-ico s"><use href="#i-mushroom"/></svg> Грибы</span>
+        <div class="ku-space s"></div>
+        <h3 class="ku-h2" id="gb-ingr-mush">Белые грибы</h3>
+        <div class="ku-space s"></div>
+        <p class="ku-lead">Грибы сначала дефростируют, а перед выкладкой на борт обязательно разогревают.</p>
+        <div class="ku-space m"></div>
+
+        <div class="ku-card gb-defrost ku-reveal">
+          <div class="gb-defrost__head">
+            <h3 class="ku-h3">Всего 42 часа</h3>
+            <p class="ku-small ku-soft">6 часов грибы дефростируются, потом хранятся ещё 36 часов.</p>
+          </div>
+          <div class="gb-defrost__bar" role="img" aria-label="6 часов дефростации, затем 36 часов хранения, всего 42 часа">
+            <div class="gb-defrost__seg is-thaw" style="--w:6"><svg class="ku-ico s"><use href="#i-snowflake"/></svg><b>6 ч</b></div>
+            <div class="gb-defrost__seg is-keep" style="--w:36"><svg class="ku-ico s"><use href="#i-clock"/></svg><b>36 ч</b></div>
+          </div>
+          <div class="gb-defrost__legend">
+            <span><i class="is-thaw"></i><span><b>Дефростация</b> — 6 часов</span></span>
+            <span><i class="is-keep"></i><span><b>Хранение</b> после дефростации — 36 часов</span></span>
+          </div>
+        </div>
+
+        <div class="ku-space m"></div>
+        <div class="ku-grid cols-2 gb-photos">
+          <figure class="gb-photo ku-reveal" style="--d:1">
+            <img src="assets/ingredients/mush-defrost.webp" alt="Сливс с белыми грибами лежит горизонтально в один слой, на нём маркировка" loading="lazy" decoding="async">
+            <figcaption>Сливсы дефростируются горизонтально, в один слой. На каждом — маркировка.</figcaption>
+          </figure>
+          <figure class="gb-photo ku-reveal" style="--d:2">
+            <img src="assets/ingredients/mush-pan.webp" alt="Белые грибы в пэне с наклейкой маркировки" loading="lazy" decoding="async">
+            <figcaption>Грибы в пэне — тоже с маркировкой.</figcaption>
+          </figure>
+        </div>
+
+        <div class="ku-space l"></div>
+        <h3 class="ku-h3 ku-reveal">Разогрев перед выкладкой на борт</h3>
+        <div class="ku-space s"></div>
+        <div class="ku-card gb-weight ku-reveal" id="gb-weight">
+          <span class="gb-weight__q">Сколько грибов в пэне?</span>
+          <div class="gb-weight__opts" role="radiogroup" aria-label="Вес грибов">
+            <button type="button" class="gb-weight__opt" role="radio" aria-checked="true" data-weight="1">50–100 г</button>
+            <button type="button" class="gb-weight__opt" role="radio" aria-checked="false" data-weight="2">101–200 г</button>
+          </div>
+          <p class="gb-weight__res" aria-live="polite"></p>
+        </div>
+
+        <div class="ku-space m"></div>
+        <ol class="gb-reheat" id="gb-reheat">
+          <li class="ku-card gb-reheat__step ku-reveal" style="--d:1">
+            <div class="gb-clip"><video src="assets/ingredients/reheat-1-start.mp4" poster="assets/ingredients/reheat-1-start.webp" muted loop playsinline preload="none" aria-label="Пэн с грибами ставят в микроволновую печь и нажимают кнопку 5"></video><button type="button" class="gb-clip__toggle" aria-label="Пауза"></button></div>
+            <div class="gb-reheat__body"><span class="gb-reheat__num">1</span><div><h4>Пэн без крышки — в микроволновку</h4><p>Нажми кнопку <b>5</b> — это 11 секунд.</p></div></div>
+          </li>
+          <li class="ku-card gb-reheat__step ku-reveal" style="--d:2">
+            <div class="gb-clip"><video src="assets/ingredients/reheat-2-stir.mp4" poster="assets/ingredients/reheat-2-stir.webp" muted loop playsinline preload="none" aria-label="Грибы перемешивают мерной ложкой"></video><button type="button" class="gb-clip__toggle" aria-label="Пауза"></button></div>
+            <div class="gb-reheat__body"><span class="gb-reheat__num">2</span><div><h4>Перемешай мерной ложкой</h4><p>После каждого цикла — иначе тепло разойдётся неровно.</p></div></div>
+          </li>
+          <li class="ku-card gb-reheat__step ku-reveal" style="--d:3" data-weight-step="2">
+            <div class="gb-clip"><video src="assets/ingredients/reheat-3-second.mp4" poster="assets/ingredients/reheat-3-second.webp" muted loop playsinline preload="none" aria-label="Второй цикл: снова кнопка 5, затем грибы перемешивают"></video><button type="button" class="gb-clip__toggle" aria-label="Пауза"></button></div>
+            <div class="gb-reheat__body"><span class="gb-reheat__num">3</span><div><h4>Второй цикл — если грибов 101–200 г</h4><p>Снова кнопка <b>5</b> и снова перемешай.</p><span class="gb-reheat__skip">Для 50–100 г этот шаг не нужен</span></div></div>
+          </li>
+          <li class="ku-card gb-reheat__step ku-reveal" style="--d:4">
+            <div class="gb-clip"><video src="assets/ingredients/reheat-4-line.mp4" poster="assets/ingredients/reheat-4-line.webp" muted loop playsinline preload="none" aria-label="Пэн с грибами и ложкой ставят на борт"></video><button type="button" class="gb-clip__toggle" aria-label="Пауза"></button></div>
+            <div class="gb-reheat__body"><span class="gb-reheat__num" data-last-num>4</span><div><h4>Поставь на борт</h4><p>Пэн с грибами — на борт, вместе с ложкой.</p></div></div>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ── Проверка ─────────────────────────────────────────────────────── -->
+    <section class="ku-section tight gb-bg" aria-labelledby="gb-ingr-quiz-title">
+      <div class="ku-wrap">
+        <div class="ku-exercise ku-reveal" data-ku-id="ingr-quiz" id="gb-ingr-quiz">
+          <span class="ku-exercise__label"><svg class="ku-ico s"><use href="#i-target"/></svg> Проверь себя</span>
+          <h3 class="ku-h3" id="gb-ingr-quiz-title" style="margin:.3em 0 1em">Пять вопросов о соусе и грибах</h3>
+          <div data-quiz-group="fb-ingr-quiz">
+            <div class="ku-quiz-q">
+              <div class="ku-quiz-q__text">1. Сколько хранится вскрытый сливс соуса в холодильной камере?</div>
+              <div class="ku-choices">
+                <button class="ku-choice" data-correct="0" data-fb="24 часа — это срок соуса в тубе при комнатной температуре."><span class="ku-choice__marker"><svg class="ku-ico s"><use href="#i-check"/></svg></span>24 часа</button>
+                <button class="ku-choice" data-correct="1" data-fb="Верно: вскрытый сливс в холодильной камере хранится 72 часа."><span class="ku-choice__marker"><svg class="ku-ico s"><use href="#i-check"/></svg></span>72 часа</button>
+                <button class="ku-choice" data-correct="0" data-fb="36 часов — это срок грибов после дефростации."><span class="ku-choice__marker"><svg class="ku-ico s"><use href="#i-check"/></svg></span>36 часов</button>
+              </div>
+              <div class="ku-feedback" aria-live="polite"></div>
+            </div>
+            <div class="ku-quiz-q">
+              <div class="ku-quiz-q__text">2. Соус залили в тубу. Сколько он годен при комнатной температуре?</div>
+              <div class="ku-choices">
+                <button class="ku-choice" data-correct="0" data-fb="Час — это только выдержка. Соус в тубе годен дольше."><span class="ku-choice__marker"><svg class="ku-ico s"><use href="#i-check"/></svg></span>1 час</button>
+                <button class="ku-choice" data-correct="0" data-fb="72 часа — это срок вскрытого сливса в холодильной камере, а не тубы."><span class="ku-choice__marker"><svg class="ku-ico s"><use href="#i-check"/></svg></span>72 часа</button>
+                <button class="ku-choice" data-correct="1" data-fb="Верно: 24 часа, и час выдержки входит в этот срок."><span class="ku-choice__marker"><svg class="ku-ico s"><use href="#i-check"/></svg></span>24 часа вместе с часом выдержки</button>
+              </div>
+              <div class="ku-feedback" aria-live="polite"></div>
+            </div>
+            <div class="ku-quiz-q">
+              <div class="ku-quiz-q__text">3. Куда обязательно клеить наклейку «Белые грибы»?</div>
+              <div class="ku-choices">
+                <button class="ku-choice" data-correct="0" data-fb="На тубу — по желанию. Обязательная маркировка — в другом месте."><span class="ku-choice__marker"><svg class="ku-ico s"><use href="#i-check"/></svg></span>Только на тубу</button>
+                <button class="ku-choice" data-correct="1" data-fb="Верно: подставка и пистолет. Так соусы не перепутать."><span class="ku-choice__marker"><svg class="ku-ico s"><use href="#i-check"/></svg></span>На подставку и пистолет</button>
+                <button class="ku-choice" data-correct="0" data-fb="Пистолета мало — наклейка нужна и на подставке."><span class="ku-choice__marker"><svg class="ku-ico s"><use href="#i-check"/></svg></span>Только на пистолет</button>
+              </div>
+              <div class="ku-feedback" aria-live="polite"></div>
+            </div>
+            <div class="ku-quiz-q">
+              <div class="ku-quiz-q__text">4. Грибы дефростировались. Сколько их ещё можно хранить?</div>
+              <div class="ku-choices">
+                <button class="ku-choice" data-correct="0" data-fb="42 часа — весь срок вместе с дефростацией. После неё остаётся меньше."><span class="ku-choice__marker"><svg class="ku-ico s"><use href="#i-check"/></svg></span>42 часа</button>
+                <button class="ku-choice" data-correct="1" data-fb="Верно: 6 часов дефростации и ещё 36 часов хранения."><span class="ku-choice__marker"><svg class="ku-ico s"><use href="#i-check"/></svg></span>36 часов</button>
+                <button class="ku-choice" data-correct="0" data-fb="6 часов — это сама дефростация."><span class="ku-choice__marker"><svg class="ku-ico s"><use href="#i-check"/></svg></span>6 часов</button>
+              </div>
+              <div class="ku-feedback" aria-live="polite"></div>
+            </div>
+            <div class="ku-quiz-q">
+              <div class="ku-quiz-q__text">5. В пэне 150 г грибов. Как разогреть?</div>
+              <div class="ku-choices">
+                <button class="ku-choice" data-correct="0" data-fb="Одного цикла хватает только на 50–100 г."><span class="ku-choice__marker"><svg class="ku-ico s"><use href="#i-check"/></svg></span>Кнопка 5 один раз, потом перемешать</button>
+                <button class="ku-choice" data-correct="0" data-fb="Перемешивать нужно после каждого цикла, иначе тепло разойдётся неровно."><span class="ku-choice__marker"><svg class="ku-ico s"><use href="#i-check"/></svg></span>Кнопка 5 два раза подряд, потом перемешать</button>
+                <button class="ku-choice" data-correct="1" data-fb="Верно: для 101–200 г — два цикла, и после каждого перемешать."><span class="ku-choice__marker"><svg class="ku-ico s"><use href="#i-check"/></svg></span>Кнопка 5, перемешать — и ещё раз</button>
+              </div>
+              <div class="ku-feedback" aria-live="polite"></div>
+            </div>
+          </div>
+          <div class="ku-feedback" id="fb-ingr-quiz" aria-live="polite"></div>
+        </div>
+
+        <div class="ku-space l"></div>
+        <div class="ku-center">
+          <button class="ku-btn primary l" id="gb-ingr-next" onclick="kuNavigate('cooking')" disabled>Дальше: приготовление <svg class="ku-ico arrow"><use href="#i-right"/></svg></button>
+          <p class="ku-caption" style="margin-top:.8em" id="gb-ingr-note">Кнопка откроется, когда ответишь на все вопросы.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ═══════════════════════ ГЛАВА 2 · ПРИГОТОВЛЕНИЕ ═══════════════════════
+       Четыре подглавы-блюда: Ангус, Биг Кинг, Пита, Воппер. Переключаются
+       вкладками, каждая содержит видео сборки, шпаргалку и упаковку блюда. -->
+  <div class="ku-page" id="ku-page-cooking">
+    <header class="gb-chapter-head">
+      <div class="gb-spores" data-count="8"></div>
+      <div class="gb-layer" style="right:3%;bottom:-18%;width:clamp(7rem,16vw,12rem);--d:-0.2;--dx:-14;--dy:-8"><div class="gb-float slow" data-deco="porcini"></div></div>
+      <div class="gb-layer" style="right:22%;top:12%;width:clamp(3rem,6vw,5rem);--d:0.25;--dx:20;--dy:12"><div class="gb-float rev" data-deco="leaf" style="rotate:-20deg"></div></div>
+      <div class="ku-wrap ku-section tight">
+        <button class="ku-btn ghost" onclick="kuNavigate('home')"><svg class="ku-ico"><use href="#i-home"/></svg> К оглавлению</button>
+        <div class="ku-space m"></div>
+        <span class="ku-eyebrow" data-chapter-num="cooking">Глава 2</span>
+        <div class="ku-space s"></div>
+        <h2 class="ku-h1">Приготовление</h2>
+        <div class="ku-space s"></div>
+        <p class="ku-lead">Четыре блюда грибной линейки. У каждого — видео сборки, шпаргалка по слоям и своя упаковка.</p>
+      </div>
+    </header>
+
+    <div class="gb-subnav-wrap gb-bg">
+      <div class="ku-wrap">
+        <div class="gb-tabs gb-subnav" role="tablist" aria-label="Блюда">
+          <button class="gb-tab" role="tab" data-sub-tab="angus"><svg class="ku-ico s gb-tab__check"><use href="#i-check"/></svg>Ангус</button>
+          <button class="gb-tab" role="tab" data-sub-tab="bigking"><svg class="ku-ico s gb-tab__check"><use href="#i-check"/></svg>Биг Кинг</button>
+          <button class="gb-tab" role="tab" data-sub-tab="pita"><svg class="ku-ico s gb-tab__check"><use href="#i-check"/></svg>Пита</button>
+          <button class="gb-tab" role="tab" data-sub-tab="whopper"><svg class="ku-ico s gb-tab__check"><use href="#i-check"/></svg>Воппер</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="gb-cooking">
+
+      <div class="gb-sub" data-sub="angus">
+        <section class="ku-section tight">
+          <div class="ku-wrap">
+            <span class="ku-eyebrow">Блюдо</span>
+            <div class="ku-space s"></div>
+            <h2 class="ku-h2">Ангус Белые грибы</h2>
+            <div class="ku-space s"></div>
+            <p class="ku-lead">Бургер на котлете Ангус с соусом и грибами: сборка и кламшелл с клапаном «Сезонный».</p>
+          </div>
+        </section>
+    <section class="ku-section tight gb-bg">
+      <div class="ku-wrap gb-dish" data-dish="angus">
+<div class="gb-video">
+            <!-- ЗАГЛУШКА ВИДЕО: вставь ссылку для iframe в data-video-src -->
+            <div class="gb-video__frame" data-video-src="https://bktube.burgerkingrus.ru/videos/embed/4Kmo6yBwyjg1FDLbDisWC2?title=0&amp;warningTitle=0&amp;peertubeLink=0&amp;p2p=0" data-video-title="Сборка: Ангус Белые грибы">
+              <div class="gb-video__stub">
+                <span class="gb-play"><svg class="ku-ico xl"><use href="#i-play"/></svg></span>
+                <b>Сборка: Ангус Белые грибы</b>
+                <small>Здесь будет видео</small>
+              </div>
+            </div>
+            <div class="ku-card gb-recipe">
+              <span class="ku-exercise__label"><svg class="ku-ico s"><use href="#i-layers"/></svg> Шпаргалка</span>
+              <div class="gb-recipe__part">
+                <span class="gb-recipe__title">Верхняя часть булочки</span>
+                <ol><li>Соус Белые грибы <b>3 нажатия</b></li><li>Салат Айсберг</li><li>Томаты <b>2 ломтика</b></li></ol>
+              </div>
+              <div class="gb-recipe__part">
+                <span class="gb-recipe__title">Нижняя часть булочки</span>
+                <ol><li>Майонез <b>2 нажатия</b></li><li>Котлета Ангус <b>гриль вверх</b></li><li>Сыр Чеддер <b>1 ломтик</b></li><li>Соус Белые грибы <b>1 нажатие</b></li><li>Белые грибы <b>2 ложки · 40 г</b></li></ol>
+              </div>
+              <div class="gb-recipe__part">
+                <span class="gb-recipe__title">Упаковка</span>
+                <div class="gb-flaps"><span class="gb-flap" style="--c:var(--ku__cap-500)">Кламшелл Ангус</span><span class="gb-flap is-key" style="--c:#2f7d4a">Клапан «Сезонный»</span></div>
+              </div>
+            </div>
+          </div>
+      </div>
+    </section>
+
+    <section class="ku-section tight" aria-labelledby="gb-pack-angus">
+      <div class="ku-wrap">
+        <span class="ku-eyebrow"><svg class="ku-ico s"><use href="#i-package"/></svg> Упаковка</span>
+        <div class="ku-space s"></div>
+        <h3 class="ku-h2" id="gb-pack-angus">Кламшелл Ангус</h3>
+        <div class="ku-space s"></div>
+        <p class="ku-lead">Ангус Белые грибы упаковывают в кламшелл Ангус. Сезонный вкус отмечает клапан «Сезонный» — его продавливают на крышке.</p>
+        <div class="ku-space m"></div>
+        <div class="gb-split ku-reveal">
+          <div class="gb-pack-art gb-split__media" data-art="lid:angus:Сезонный"></div>
+          <div class="gb-split__text">
+            <div class="gb-must">
+              <div class="gb-must__row is-must"><svg class="ku-ico s"><use href="#i-check"/></svg><span><b>Клапан «Сезонный»</b> — продавить всегда</span></div>
+              <div class="gb-must__row"><svg class="ku-ico s"><use href="#i-info"/></svg><span><b>Наклейка «Остро»</b> — если заказ острый</span></div>
+              <div class="gb-must__row"><svg class="ku-ico s"><use href="#i-info"/></svg><span><b>«Двойная котлета»</b> — если котлет две</span></div>
+            </div>
+            <p class="ku-small ku-soft" style="margin-top:1em">Клапан «Классика» остаётся нетронутым: он для обычного Ангуса без сезонного вкуса.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  
+        <section class="ku-section tight">
+          <div class="ku-wrap ku-center">
+            <button class="ku-btn primary l" data-sub-next="bigking">Дальше: Биг Кинг <svg class="ku-ico arrow"><use href="#i-right"/></svg></button>
+          </div>
+        </section>
+      </div>
+
+      <div class="gb-sub" data-sub="bigking">
+        <section class="ku-section tight">
+          <div class="ku-wrap">
+            <span class="ku-eyebrow">Блюдо</span>
+            <div class="ku-space s"></div>
+            <h2 class="ku-h2">Биг Кинг Белые грибы</h2>
+            <div class="ku-space s"></div>
+            <p class="ku-lead">Две котлеты, сыр, огурцы и хрустящий лук. Коробку Биг Кинг можно покрутить в 3D.</p>
+          </div>
+        </section>
+    <section class="ku-section tight gb-bg">
+      <div class="ku-wrap gb-dish" data-dish="bigking">
+<div class="gb-video">
+            <div class="gb-video__frame" data-video-src="https://bktube.burgerkingrus.ru/videos/embed/jgnGSYqgDMcAn8n7ktR64C?title=0&amp;warningTitle=0&amp;peertubeLink=0&amp;p2p=0" data-video-title="Сборка: Биг Кинг Белые грибы">
+              <div class="gb-video__stub">
+                <span class="gb-play"><svg class="ku-ico xl"><use href="#i-play"/></svg></span>
+                <b>Сборка: Биг Кинг Белые грибы</b>
+                <small>Здесь будет видео</small>
+              </div>
+            </div>
+            <div class="ku-card gb-recipe">
+              <span class="ku-exercise__label"><svg class="ku-ico s"><use href="#i-layers"/></svg> Шпаргалка</span>
+              <div class="gb-recipe__part">
+                <span class="gb-recipe__title">Верхняя часть булочки</span>
+                <ol><li>Соус Белые грибы <b>2 нажатия</b></li><li>Салат Айсберг</li><li>Томат <b>1 ломтик</b></li></ol>
+              </div>
+              <div class="gb-recipe__part">
+                <span class="gb-recipe__title">Нижняя часть булочки</span>
+                <ol><li>Котлета Гамбургер <b>гриль вверх</b></li><li>Соус Белые грибы <b>1 нажатие</b></li><li>Котлета Гамбургер <b>гриль вверх</b></li><li>Сыр Чеддер <b>2 ломтика</b></li><li>Маринованный огурец <b>1 ломтик</b></li><li>Хрустящий лук <b>1 ложка</b></li></ol>
+              </div>
+              <div class="gb-recipe__part">
+                <span class="gb-recipe__title">Упаковка</span>
+                <div class="gb-flaps"><span class="gb-flap" style="--c:var(--gb-pack-bk)">Упаковка Биг Кинг</span><span class="gb-flap" style="--c:var(--ku__cap-600)">Отметка времени</span><span class="gb-flap is-key" style="--c:var(--gb-pack-yellow)">Клапан «Звезда»</span></div>
+              </div>
+            </div>
+          </div>
+      </div>
+    </section>
+
+    <!-- 3D-коробка Биг Кинг: крутить пальцем (js/gb-pack3d.js, модель blender/bigking) -->
+    <section class="ku-section tight" aria-labelledby="gb-3d-bk-title">
+      <div class="ku-wrap">
+        <span class="ku-eyebrow"><svg class="ku-ico s"><use href="#i-package"/></svg> Упаковка · 3D-модель</span>
+        <div class="ku-space s"></div>
+        <h3 class="ku-h2" id="gb-3d-bk-title">Коробка Биг Кинг</h3>
+        <div class="ku-space s"></div>
+        <p class="ku-lead">Потяни коробку пальцем или мышкой, чтобы рассмотреть её со всех сторон.</p>
+        <div class="ku-space m"></div>
+
+        <div class="gb-3d" id="gb-3d-bk" data-model="bigking">
+          <div class="gb-3d__col">
+            <div class="gb-3d__stage">
+              <img class="gb-3d__fallback" src="assets/3d/bigking-fallback.webp" alt="Коробка Биг Кинг в собранном виде">
+              <div class="gb-3d__loading" aria-live="polite"><span class="gb-3d__spinner"></span> Загружаем 3D-модель…</div>
+              <div class="gb-3d__hint" aria-hidden="true"><svg class="ku-ico s"><use href="#i-move"/></svg> Потяни, чтобы покрутить</div>
+              <div class="gb-3d__tip" role="status"></div>
+              <div class="gb-3d__tools">
+                <button type="button" class="gb-3d__tool icon" data-3d="reset" aria-label="Вернуть вид"><svg class="ku-ico"><use href="#i-refresh"/></svg></button>
+              </div>
+            </div>
+            <div class="gb-3d__chips-wrap">
+              <span class="ku-caption">Клапаны — нажми, чтобы продавить:</span>
+              <div class="gb-3d__chips"></div>
+            </div>
+          </div>
+
+          <ol class="gb-3d__steps">
+            <li><button type="button" class="gb-3d-step is-active" data-step="0" aria-current="step">
+              <span class="gb-3d-step__num">1</span>
+              <span><b>Лицевая сторона</b>
+              <span class="gb-3d-step__text">Надпись «Биг Кинг», под ней — два клапана маркировки: «Классика» и со звездой.</span></span>
+            </button></li>
+            <li><button type="button" class="gb-3d-step" data-step="1">
+              <span class="gb-3d-step__num">2</span>
+              <span><b>Клапан со звездой — для грибного вкуса</b>
+              <span class="gb-3d-step__text">Биг Кинг Белые грибы отмечают клапаном со звездой. «Классика» остаётся нетронутой.</span></span>
+            </button>
+            <button type="button" class="ku-btn soft gb-3d-step__action" data-mission><svg class="ku-ico"><use href="#i-target"/></svg> Найди и продави сам</button></li>
+            <li><button type="button" class="gb-3d-step" data-step="2">
+              <span class="gb-3d-step__num">3</span>
+              <span><b>Крышка и отметка времени</b>
+              <span class="gb-3d-step__text">Крышка закрывается язычком за заднюю стенку. На боковой стенке — шкала времени приготовления: отметь нужное деление.</span></span>
+            </button></li>
+            <li><button type="button" class="gb-3d-step" data-step="3">
+              <span class="gb-3d-step__num">4</span>
+              <span><b>Дно</b>
+              <span class="gb-3d-step__text">Дно собирается замком из четырёх клапанов — коробку не нужно склеивать.</span></span>
+            </button></li>
+          </ol>
+        </div>
+        <div class="ku-feedback" id="fb-pack3d-bk" aria-live="polite" data-ku-id="pack-3d-bk"></div>
+      </div>
+    </section>
+  
+        <section class="ku-section tight">
+          <div class="ku-wrap ku-center">
+            <button class="ku-btn primary l" data-sub-next="pita">Дальше: Пита <svg class="ku-ico arrow"><use href="#i-right"/></svg></button>
+          </div>
+        </section>
+      </div>
+
+      <div class="gb-sub" data-sub="pita">
+        <section class="ku-section tight">
+          <div class="ku-wrap">
+            <span class="ku-eyebrow">Блюдо</span>
+            <div class="ku-space s"></div>
+            <h2 class="ku-h2">Ангус Пита Белые грибы</h2>
+            <div class="ku-space s"></div>
+            <p class="ku-lead">То же наполнение, что у Ангуса, но в тортилье: собирается на двух половинках.</p>
+          </div>
+        </section>
+    <section class="ku-section tight gb-bg">
+      <div class="ku-wrap gb-dish" data-dish="pita">
+<div class="gb-video">
+            <div class="gb-video__frame" data-video-src="https://bktube.burgerkingrus.ru/videos/embed/682G1sbbZmH3tGLPpzmXJn?title=0&amp;warningTitle=0&amp;peertubeLink=0&amp;p2p=0" data-video-title="Сборка: Ангус Пита Белые грибы">
+              <div class="gb-video__stub">
+                <span class="gb-play"><svg class="ku-ico xl"><use href="#i-play"/></svg></span>
+                <b>Сборка: Ангус Пита Белые грибы</b>
+                <small>Здесь будет видео</small>
+              </div>
+            </div>
+            <div class="ku-card gb-recipe">
+              <span class="ku-exercise__label"><svg class="ku-ico s"><use href="#i-layers"/></svg> Шпаргалка</span>
+              <div class="gb-recipe__part">
+                <span class="gb-recipe__title">Верхняя часть тортильи</span>
+                <ol><li>Соус Белые грибы <b>3 нажатия</b></li><li>Салат Айсберг</li><li>Томаты <b>2 ломтика</b></li></ol>
+              </div>
+              <div class="gb-recipe__part">
+                <span class="gb-recipe__title">Нижняя часть тортильи</span>
+                <ol><li>Майонез <b>2 нажатия</b></li><li>Котлета Ангус <b>гриль вверх</b></li><li>Сыр Чеддер <b>1 ломтик</b></li><li>Белые грибы <b>2 ложки · 40 г</b></li></ol>
+              </div>
+              <div class="gb-recipe__part">
+                <span class="gb-recipe__title">Упаковка</span>
+                <div class="gb-flaps"><span class="gb-flap" style="--c:var(--gb-pack-orange)">Сторона без «Остро»</span><span class="gb-flap is-key" style="--c:#2f7d4a">Клапан «Сезонный»</span></div>
+              </div>
+            </div>
+          </div>
+      </div>
+    </section>
+
+    <section class="ku-section tight">
+      <div class="ku-wrap measure" style="padding:0">
+        <div class="ku-callout ku-reveal" style="background:var(--ku-card)">
+          <span class="ku-callout__icon"><svg class="ku-ico l"><use href="#i-package"/></svg></span>
+          <div><div class="ku-callout__title">Упаковка питы</div><p>Пита едет в своей упаковке: сезонный вкус отмечают клапаном «Сезонный» на торце, а сторона с надписью «Остро» нужна только для острых блюд. Разбор упаковки добавим, когда будет макет.</p></div>
+        </div>
+      </div>
+    </section>
+  
+        <section class="ku-section tight">
+          <div class="ku-wrap ku-center">
+            <button class="ku-btn primary l" data-sub-next="whopper">Дальше: Воппер <svg class="ku-ico arrow"><use href="#i-right"/></svg></button>
+          </div>
+        </section>
+      </div>
+
+      <div class="gb-sub" data-sub="whopper">
+        <section class="ku-section tight">
+          <div class="ku-wrap">
+            <span class="ku-eyebrow">Блюдо</span>
+            <div class="ku-space s"></div>
+            <h2 class="ku-h2">Воппер Белые грибы</h2>
+            <div class="ku-space s"></div>
+            <p class="ku-lead">Меняется только соус, зато упаковка новая: вкус на ней написан словами. Здесь же ролл.</p>
+          </div>
+        </section>
+    <!-- 3D-упаковка: крутить пальцем, продавливать клапаны (js/gb-pack3d.js) -->
+    <section class="ku-section tight gb-bg" aria-labelledby="gb-3d-title">
+      <div class="ku-wrap">
+        <span class="ku-eyebrow"><svg class="ku-ico s"><use href="#i-package"/></svg> 3D-модель</span>
+        <div class="ku-space s"></div>
+        <h3 class="ku-h2" id="gb-3d-title">Покрути упаковку сам</h3>
+        <div class="ku-space s"></div>
+        <p class="ku-lead">Потяни коробку пальцем или мышкой. Нажми на клапан — он продавится, как на станции.</p>
+        <div class="ku-space m"></div>
+
+        <div class="gb-3d" id="gb-3d" data-model="clamshell">
+          <div class="gb-3d__col">
+            <div class="gb-3d__stage">
+              <img class="gb-3d__fallback" src="assets/3d/clamshell-fallback.webp" alt="Упаковка «Твой особенный Воппер» в собранном виде">
+              <div class="gb-3d__loading" aria-live="polite"><span class="gb-3d__spinner"></span> Загружаем 3D-модель…</div>
+              <div class="gb-3d__hint" aria-hidden="true"><svg class="ku-ico s"><use href="#i-move"/></svg> Потяни, чтобы покрутить</div>
+              <div class="gb-3d__tip" role="status"></div>
+              <div class="gb-3d__tools">
+                <button type="button" class="gb-3d__tool" data-3d="lid" aria-pressed="false"><svg class="ku-ico"><use href="#i-package"/></svg> Открыть крышку</button>
+                <button type="button" class="gb-3d__tool icon" data-3d="reset" aria-label="Вернуть вид"><svg class="ku-ico"><use href="#i-refresh"/></svg></button>
+              </div>
+            </div>
+            <div class="gb-3d__chips-wrap">
+              <span class="ku-caption">Клапаны — нажми, чтобы продавить:</span>
+              <div class="gb-3d__chips"></div>
+            </div>
+          </div>
+
+          <ol class="gb-3d__steps">
+            <li><button type="button" class="gb-3d-step is-active" data-step="0" aria-current="step">
+              <span class="gb-3d-step__num">1</span>
+              <span><b>«Твой особенный Воппер»</b>
+              <span class="gb-3d-step__text">Новая упаковка для Воппера. Пламя, логотип и клапаны для маркировки остались на месте.</span></span>
+            </button></li>
+            <li><button type="button" class="gb-3d-step" data-step="1">
+              <span class="gb-3d-step__num">2</span>
+              <span><b>Вкус написан словами</b>
+              <span class="gb-3d-step__text">На старой упаковке сезонный вкус отмечали общим клапаном «Сезонный». На новой у каждого вкуса свой клапан с подписью: «Новинка», «Белые грибы», «Острый», «Пармезан», «4 сыра», «Гриль».</span></span>
+            </button></li>
+            <li><button type="button" class="gb-3d-step" data-step="2">
+              <span class="gb-3d-step__num">3</span>
+              <span><b>Для грибного вкуса — «Белые грибы»</b>
+              <span class="gb-3d-step__text">Клапан стоит на ребре крышки, со стороны шарнира. Продави его — кассир прочитает название вкуса и не перепутает заказ.</span></span>
+            </button>
+            <button type="button" class="ku-btn soft gb-3d-step__action" data-mission><svg class="ku-ico"><use href="#i-target"/></svg> Найди и продави сам</button></li>
+            <li><button type="button" class="gb-3d-step" data-step="3">
+              <span class="gb-3d-step__num">4</span>
+              <span><b>Котлеты и сыр — отдельные отметки</b>
+              <span class="gb-3d-step__text">На передней стенке крышки — язычки «Двойная котлета», «Тройная котлета» и «Сыр». Отметь всё, что есть в заказе.</span></span>
+            </button></li>
+            <li><button type="button" class="gb-3d-step" data-step="4">
+              <span class="gb-3d-step__num">5</span>
+              <span><b>Сначала — старая упаковка</b>
+              <span class="gb-3d-step__text">Новую упаковку берут в работу, когда закончится старая. Пока старая есть, упаковывай в неё и отмечай клапан «Сезонный».</span></span>
+            </button></li>
+          </ol>
+        </div>
+        <div class="ku-feedback" id="fb-pack3d" aria-live="polite" data-ku-id="pack-3d"></div>
+      </div>
+    </section>
+
+    <!-- 3D-упаковка ролла -->
+    <section class="ku-section tight" aria-labelledby="gb-3d-roll-title">
+      <div class="ku-wrap">
+        <span class="ku-eyebrow"><svg class="ku-ico s"><use href="#i-package"/></svg> 3D-модель</span>
+        <div class="ku-space s"></div>
+        <h3 class="ku-h2" id="gb-3d-roll-title">Упаковка ролла</h3>
+        <div class="ku-space s"></div>
+        <p class="ku-lead">У Воппер Ролла своя упаковка, но логика та же: вкус написан словами на клапане. Покрути её и найди клапаны.</p>
+        <div class="ku-space m"></div>
+
+        <div class="gb-3d gb-3d--tall" id="gb-3d-roll" data-model="roll">
+          <div class="gb-3d__col">
+            <div class="gb-3d__stage">
+              <img class="gb-3d__fallback" src="assets/3d/roll-fallback.webp" alt="Упаковка «Твой особенный Воппер Ролл» в собранном виде">
+              <div class="gb-3d__loading" aria-live="polite"><span class="gb-3d__spinner"></span> Загружаем 3D-модель…</div>
+              <div class="gb-3d__hint" aria-hidden="true"><svg class="ku-ico s"><use href="#i-move"/></svg> Потяни, чтобы покрутить</div>
+              <div class="gb-3d__tip" role="status"></div>
+              <div class="gb-3d__tools">
+                <button type="button" class="gb-3d__tool icon" data-3d="reset" aria-label="Вернуть вид"><svg class="ku-ico"><use href="#i-refresh"/></svg></button>
+              </div>
+            </div>
+            <div class="gb-3d__chips-wrap">
+              <span class="ku-caption">Клапаны — нажми, чтобы продавить:</span>
+              <div class="gb-3d__chips"></div>
+            </div>
+          </div>
+
+          <ol class="gb-3d__steps">
+            <li><button type="button" class="gb-3d-step is-active" data-step="0" aria-current="step">
+              <span class="gb-3d-step__num">1</span>
+              <span><b>«Твой особенный Воппер Ролл»</b>
+              <span class="gb-3d-step__text">Гранёная упаковка: книзу сужается, сверху края загнуты внутрь. Посередине — отрывная лента, чтобы открыть ролл.</span></span>
+            </button></li>
+            <li><button type="button" class="gb-3d-step" data-step="1">
+              <span class="gb-3d-step__num">2</span>
+              <span><b>Клапаны — на боковом ребре</b>
+              <span class="gb-3d-step__text">Шесть клапанов идут столбиком сверху вниз: «Пармезан», «Гриль», «4 сыра», «Острый», «Белые грибы», «Новинка».</span></span>
+            </button></li>
+            <li><button type="button" class="gb-3d-step" data-step="2">
+              <span class="gb-3d-step__num">3</span>
+              <span><b>Для грибного вкуса — «Белые грибы»</b>
+              <span class="gb-3d-step__text">Второй клапан снизу. Продави его — кассир сразу увидит вкус.</span></span>
+            </button>
+            <button type="button" class="ku-btn soft gb-3d-step__action" data-mission><svg class="ku-ico"><use href="#i-target"/></svg> Найди и продави сам</button></li>
+            <li><button type="button" class="gb-3d-step" data-step="3">
+              <span class="gb-3d-step__num">4</span>
+              <span><b>Сначала — старая упаковка</b>
+              <span class="gb-3d-step__text">С роллом правило то же: пока есть старая упаковка, упаковывай в неё и отмечай «Сезонный». Закончилась — переходи на новую.</span></span>
+            </button></li>
+          </ol>
+        </div>
+        <div class="ku-feedback" id="fb-pack3d-roll" aria-live="polite" data-ku-id="pack-3d-roll"></div>
+      </div>
+    </section>
+
+    <section class="ku-section tight gb-bg">
+      <div class="ku-wrap">
+        <h3 class="ku-h2 ku-reveal">Было и стало</h3>
+        <div class="ku-space s"></div>
+        <p class="ku-lead ku-reveal">С роллом то же самое: на новой упаковке клапаны с названиями вкусов идут столбиком по центру.</p>
+        <div class="ku-space m"></div>
+        <div class="ku-grid cols-2">
+          <div class="ku-card ku-reveal" style="--d:1">
+            <span class="ku-badge neutral">Сначала</span>
+            <h4 class="ku-h4" style="margin:.5em 0">Старая упаковка</h4>
+            <p class="ku-small ku-soft" style="margin:0 0 .8em">Кламшелл Воппера и упаковка ролла прежнего дизайна. Сезонный вкус на них отмечает один общий клапан.</p>
+            <div class="gb-flaps"><span class="gb-flap is-key" style="--c:#2f7d4a">Клапан «Сезонный»</span></div>
+          </div>
+          <div class="ku-card ku-reveal" style="--d:2">
+            <span class="ku-badge solid">Когда старая закончится</span>
+            <h4 class="ku-h4" style="margin:.5em 0">Новая упаковка</h4>
+            <p class="ku-small ku-soft" style="margin:0 0 .8em">«Твой особенный Воппер» и «Твой особенный Воппер Ролл». У каждого вкуса свой клапан с названием — его и продавливаем.</p>
+            <div class="gb-flaps"><span class="gb-flap is-key" style="--c:var(--gb-pack-blue)">Клапан «Белые грибы»</span></div>
+          </div>
+        </div>
+
+        <div class="ku-space l"></div>
+        <div class="ku-wrap measure" style="padding:0">
+          <div class="ku-callout ku-reveal" style="background:var(--ku-card)">
+            <span class="ku-callout__icon"><svg class="ku-ico l"><use href="#i-bulb"/></svg></span>
+            <div><div class="ku-callout__title">Главное</div><p>Есть старая упаковка — бери её и продавливай «Сезонный». Старая закончилась — переходи на «Твой особенный Воппер» и продавливай «Белые грибы».</p></div>
+          </div>
+        </div>
+
+        <div class="ku-space l"></div>
+        <!-- Ситуационный тест -->
+        <div class="ku-exercise ku-reveal" data-ku-id="pack-quiz" id="gb-pq">
+          <div class="ku-exercise__label"><svg class="ku-ico s"><use href="#i-package"/></svg> Ситуация на станции</div>
+          <div class="gb-steps-mini"></div>
+          <div data-pq-body>
+            <p class="ku-caption" data-pq-count style="margin:0"></p>
+            <div class="gb-situation">
+              <span class="ku-icon-badge round"><svg class="ku-ico"><use href="#i-utensils"/></svg></span>
+              <p data-pq-situation></p>
+            </div>
+            <div class="gb-pq-options" data-pq-options></div>
+            <div class="ku-feedback" id="fb-pq" aria-live="polite"></div>
+            <div class="ku-space s"></div>
+            <button class="ku-btn primary" data-pq-next hidden></button>
+          </div>
+        </div>
+
+        <div class="ku-space l"></div>
+        <div class="ku-center">
+          <button class="ku-btn primary l" id="gb-pack-next" onclick="kuNavigate('trainer')" disabled>Дальше: тренажёр <svg class="ku-ico arrow"><use href="#i-right"/></svg></button>
+          <p class="ku-caption" style="margin-top:.8em">Кнопка откроется, когда разберёшь все ситуации.</p>
+        </div>
+      </div>
+    </section>
+  
+        <section class="ku-section tight">
+          <div class="ku-wrap ku-center">
+            <button class="ku-btn primary l" id="gb-cooking-next" onclick="kuNavigate('trainer')" disabled><svg class="ku-ico"><use href="#i-trophy"/></svg> Дальше: тренажёр</button>
+          <p class="ku-caption" style="margin-top:.8em" id="gb-cooking-note">Кнопка откроется, когда разберёшь все четыре блюда.</p>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+
+
+  <!-- ═══════════════════════ ГЛАВА 3 · ТРЕНАЖЁР ═══════════════════════ -->
+  <div class="ku-page" id="ku-page-trainer">
+    <header class="gb-chapter-head">
+      <div class="gb-spores" data-count="8"></div>
+      <div class="gb-layer" style="right:3%;bottom:-16%;width:clamp(7rem,15vw,11rem);--d:-0.2;--dx:-14;--dy:-8"><div class="gb-float slow" data-deco="porcini"></div></div>
+      <div class="gb-layer" style="right:21%;top:10%;width:clamp(3rem,6vw,5rem);--d:0.25;--dx:20;--dy:12"><div class="gb-float rev" data-deco="leaf|var(--ku__cap-400)" style="rotate:18deg"></div></div>
+      <div class="ku-wrap ku-section tight">
+        <button class="ku-btn ghost" onclick="kuNavigate('home')"><svg class="ku-ico"><use href="#i-home"/></svg> К оглавлению</button>
+        <div class="ku-space m"></div>
+        <span class="ku-eyebrow" data-chapter-num="trainer">Глава 3</span>
+        <div class="ku-space s"></div>
+        <h2 class="ku-h1">Тренажёр</h2>
+        <div class="ku-space s"></div>
+        <p class="ku-lead" id="gb-trainer-lead">Выбери, кем работаешь в ресторане. От роли зависит, какой тренажёр ты пройдёшь.</p>
+      </div>
+    </header>
+
+    <section class="ku-section tight gb-bg" id="gb-trainer">
+      <div class="ku-wrap">
+        <div class="gb-roles" id="gb-roles">
+          <button class="ku-card hover-lift gb-role ku-reveal" style="--d:1" data-role="cook" aria-pressed="false">
+            <span class="ku-icon-badge solid"><svg class="ku-ico"><use href="#i-utensils"/></svg></span>
+            <h3>Повар</h3>
+            <p>Собираешь и упаковываешь 8 блюд грибной линейки на время.</p>
+          </button>
+          <button class="ku-card hover-lift gb-role ku-reveal" style="--d:2" data-role="cashier" aria-pressed="false">
+            <span class="ku-icon-badge solid"><svg class="ku-ico"><use href="#i-bag"/></svg></span>
+            <h3>Кассир</h3>
+            <p>Проверяешь маркировку на упаковке и отдаёшь гостю нужное блюдо.</p>
+          </button>
+          <button class="ku-card hover-lift gb-role ku-reveal" style="--d:3" data-role="universal" aria-pressed="false">
+            <span class="ku-icon-badge solid"><svg class="ku-ico"><use href="#i-users"/></svg></span>
+            <h3>Универсал</h3>
+            <p>Работаешь и на кухне, и на кассе — проходишь оба тренажёра.</p>
+          </button>
+        </div>
+
+        <div class="ku-space l"></div>
+        <div id="gb-tracks" hidden style="scroll-margin-top:5rem">
+          <h3 class="ku-h3" id="gb-tracks-title">Твой тренажёр</h3>
+          <div class="ku-space s"></div>
+          <div class="gb-track" id="gb-tracks-list"></div>
+          <div class="ku-space s"></div>
+          <p class="ku-caption" id="gb-role-note">Роль можно сменить — просто выбери другую карточку выше. Результаты сохраняются.</p>
+        </div>
+
+        <div class="ku-space l"></div>
+        <div class="ku-center">
+          <button class="ku-btn primary l" id="gb-trainer-next" onclick="kuNavigate('finish')" disabled><svg class="ku-ico"><use href="#i-trophy"/></svg> К завершению курса</button>
+          <p class="ku-caption" id="gb-trainer-note" style="margin-top:.8em" hidden>Кнопка откроется, когда пройдёшь тренажёры своей роли.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ═══════════════════════ ФИНАЛ ═══════════════════════ -->
+
+  <!-- ═══════════════════════ ФИНАЛ ═══════════════════════ -->
+  <div class="ku-page" id="ku-page-finish">
+    <section class="ku-section gb-bg">
+      <div class="ku-wrap measure ku-center">
+        <div class="ku-icon-badge solid round" style="margin-inline:auto"><svg class="ku-ico"><use href="#i-trophy"/></svg></div>
+        <div class="ku-space s"></div>
+        <h2 class="ku-h1">Курс пройден!</h2>
+        <p class="ku-lead">Грибная линейка, новая упаковка и тренажёр — позади. Проверь свои результаты и нажми «Завершить курс».</p>
+        <div class="ku-space m"></div>
+
+        <div class="ku-report" data-ku-report="position,role,cook-result,cashier-result" style="text-align:left"></div>
+        <div class="ku-space s"></div>
+        <div class="ku-row center">
+          <button class="ku-btn soft" data-ku-report-copy><svg class="ku-ico"><use href="#i-copy"/></svg> Скопировать результаты</button>
+          <button class="ku-btn soft" data-ku-report-download><svg class="ku-ico"><use href="#i-download"/></svg> Скачать .txt</button>
+        </div>
+        <div class="ku-space l"></div>
+
+        <button class="ku-btn primary l" data-ku-complete disabled>
+          <svg class="ku-ico"><use href="#i-check"/></svg> Завершить курс
+        </button>
+        <p class="ku-caption" style="margin-top:0.8em">Кнопка передаёт в LMS статус «Пройден».</p>
+        <p class="gb-final-lock" id="gb-final-lock" hidden><svg class="ku-ico s"><use href="#i-lock"/></svg> Чтобы завершить курс, пройди тренажёры своей роли.
+          <button class="ku-btn ghost" onclick="kuNavigate('trainer')">К тренажёру</button></p>
+      </div>
+    </section>
+  </div>
+
+</main>
+
+<!-- ═══ ОКНО ТРЕНАЖЁРА (полноэкранное) ═══ -->
+<div class="gb-app" id="gb-app" role="dialog" aria-modal="true" aria-labelledby="gb-app-title-text">
+  <div class="gb-app__bar">
+    <span class="gb-app__title"><svg class="ku-ico brand"><use href="#i-mushroom"/></svg> <span id="gb-app-title-text">Тренажёр</span></span>
+    <div class="ku-row s" id="gb-app-hud"></div>
+    <span class="gb-app__spacer"></span>
+    <button class="ku-btn ghost" id="gb-app-exit" aria-label="Выйти из тренажёра"><svg class="ku-ico"><use href="#i-x"/></svg> <span class="gb-exit-label">Выйти</span></button>
+  </div>
+  <div class="gb-app__main" id="gb-app-main"></div>
+  <div class="gb-toast" id="gb-toast" role="status" aria-live="polite"></div>
+  <div class="gb-fb" id="gb-fb" role="alertdialog" aria-modal="true" aria-labelledby="gb-fb-title">
+    <div class="gb-fb__card">
+      <div class="gb-fb__head">
+        <span class="ku-icon-badge round" id="gb-fb-icon"></span>
+        <div class="gb-fb__title" id="gb-fb-title"></div>
+      </div>
+      <p class="gb-fb__text" id="gb-fb-text"></p>
+      <span class="gb-fb__paused" id="gb-fb-paused"><svg class="ku-ico s"><use href="#i-clock"/></svg> Таймеры на паузе</span>
+      <div class="ku-row">
+        <button class="ku-btn primary" id="gb-fb-primary">Исправить</button>
+        <button class="ku-btn ghost" id="gb-fb-secondary" hidden></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ МОДАЛКА ПРОМТА ДЛЯ КАРТИНКИ ═══ -->
+<div class="ku-modal-overlay" id="gb-prompt-modal">
+  <div class="ku-modal wide" role="dialog" aria-modal="true" aria-labelledby="gb-prompt-title">
+    <button class="ku-modal__close" data-ku-modal-close aria-label="Закрыть"><svg class="ku-ico"><use href="#i-x"/></svg></button>
+    <span class="ku-exercise__label"><svg class="ku-ico s"><use href="#i-sparkles"/></svg> Промт для картинки</span>
+    <h3 class="ku-h4" id="gb-prompt-title" style="margin:.2em 0 .6em;word-break:break-all;font-family:ui-monospace,Menlo,monospace;font-size:.9rem" data-prompt-file></h3>
+    <div class="gb-prompt-text" data-prompt-body></div>
+    <div class="ku-space s"></div>
+    <button class="ku-btn primary" data-prompt-copy>Скопировать промт</button>
+  </div>
+</div>
+
+<script src="js/kuds.js"></script>
+<script src="js/ku-scorm.js"></script>
+<script src="js/gb-art.js"></script>
+<script src="js/gb-assets.js"></script>
+<script src="js/gb-shell.js"></script>
+<script src="js/gb-cook.js"></script>
+<script src="js/gb-cashier.js"></script>
+<script src="js/gb-course.js"></script>
+<script src="js/gb-pack3d.js"></script>
+</body>
+</html>
