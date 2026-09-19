@@ -1,8 +1,0 @@
-{
-  "canvas": { "width": 640, "height": 1080, "video_reference": "1920x1080", "horizontal_fraction": "1/3" },
-  "sequences": [
-    { "id": "angus", "title": "Ангус Белые грибы", "frames": 9, "pattern": "frames/angus/angus_%03d.png" },
-    { "id": "pita", "title": "Ангус Пита Белые грибы", "frames": 8, "pattern": "frames/pita/pita_%03d.png" },
-    { "id": "bigking", "title": "Биг Кинг Белые грибы", "frames": 10, "pattern": "frames/bigking/bigking_%03d.png" }
-  ]
-}

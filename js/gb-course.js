@@ -198,6 +198,25 @@
       el.dataset.gbArt = "1";
       el.innerHTML = window.GBArtRender(el.dataset.art);
     });
+    // фото со станции — по клику крупно, чтобы рассмотреть маркировку
+    const box = document.createElement("div");
+    box.className = "gb-lightbox"; box.hidden = true;
+    box.innerHTML = `<button class="gb-tool gb-lightbox__close" aria-label="Закрыть">${icon("i-x")}</button><img alt="">`;
+    document.body.appendChild(box);
+    const closeBox = () => { box.hidden = true; document.body.style.overflow = ""; };
+    box.addEventListener("click", (e) => { if (e.target === box || e.target.closest(".gb-lightbox__close")) closeBox(); });
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeBox(); });
+    $$(".gb-photo img, .gb-shelf__card img").forEach(img => {
+      img.tabIndex = 0; img.setAttribute("role", "button");
+      const open = () => {
+        box.querySelector("img").src = img.src;
+        box.querySelector("img").alt = img.alt;
+        box.hidden = false; document.body.style.overflow = "hidden";
+      };
+      img.addEventListener("click", open);
+      img.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); } });
+    });
+
     // подглавы-блюда: вкладки, переходы и отметка «разобрал»
     const subs = $$(".gb-sub"), tabs = $$("[data-sub-tab]");
     if (!subs.length) return;
@@ -205,8 +224,13 @@
       subs.forEach(x => x.classList.toggle("is-active", x.dataset.sub === key));
       tabs.forEach(t => { const on = t.dataset.subTab === key; t.classList.toggle("is-active", on); t.setAttribute("aria-selected", on); });
       paintSubs();
+      // встаём на начало подглавы: сперва её заголовок и ролик, а не середина блока
       const nav = $(".gb-subnav-wrap");
-      if (nav) window.scrollTo({ top: nav.getBoundingClientRect().top + scrollY - 8, behavior: reduce ? "auto" : "smooth" });
+      const cur = subs.find(x => x.dataset.sub === key);
+      if (cur) {
+        const off = nav ? nav.getBoundingClientRect().height + 8 : 8;
+        window.scrollTo({ top: cur.getBoundingClientRect().top + scrollY - off, behavior: reduce ? "auto" : "smooth" });
+      }
     };
     const paintSubs = () => {
       if (KUv.isDone("pack-quiz")) KUv.done("ch-whopper");     // подглава Воппера закрывается тестом
@@ -307,34 +331,34 @@
   /* ══ 4. СИТУАЦИОННЫЙ ТЕСТ ПО УПАКОВКЕ ═══════════════════════════════ */
   const PQ = [
     {
-      situation: "Гость заказал <b>Воппер Белые грибы</b>. На станции есть и старая упаковка Воппера, и новая «Твой особенный Воппер». Какую возьмёшь и как промаркируешь?",
+      situation: "Гость заказал <b>Воппер Белые грибы</b>. На станции есть и текущая упаковка Воппера, и новая «Твой особенный Воппер» — называются они одинаково, отличаются клапанами. Какую возьмёшь и как промаркируешь?",
       options: [
-        { label: "Старая упаковка", sub: "Продавить клапан «Сезонный»", ok: true,
-          fb: "<strong>Верно.</strong> Пока старая упаковка не закончилась, упаковывай в неё и отмечай клапан «Сезонный»." },
+        { label: "Текущая упаковка", sub: "Продавить клапан «Сезонный»", ok: true,
+          fb: "<strong>Верно.</strong> Пока текущая упаковка не закончилась, упаковывай в неё и отмечай клапан «Сезонный»." },
         { label: "Новая упаковка", sub: "Продавить клапан «Белые грибы»",
-          fb: "<strong>Пока рано.</strong> Новую упаковку начинают использовать, когда закончится старая. Какую упаковку взять сейчас?" },
-        { label: "Старая упаковка", sub: "Без отметки",
-          fb: "<strong>Не хватает маркировки.</strong> Без отметки кассир не отличит грибной Воппер от обычного. Какой клапан есть на старой упаковке?" },
+          fb: "<strong>Пока рано.</strong> Новую упаковку начинают использовать, когда закончится текущая. Какую упаковку взять сейчас?" },
+        { label: "Текущая упаковка", sub: "Без отметки",
+          fb: "<strong>Не хватает маркировки.</strong> Без отметки кассир не отличит грибной Воппер от обычного. Какой клапан есть на текущей упаковке?" },
       ],
     },
     {
-      situation: "Следующий заказ — <b>Воппер Ролл Белые грибы</b>. На станции остались обе упаковки ролла: старая и новая. Что выберешь?",
+      situation: "Следующий заказ — <b>Воппер Ролл Белые грибы</b>. На станции остались обе упаковки ролла: текущая и новая. Что выберешь?",
       options: [
         { label: "Новая упаковка ролла", sub: "Продавить клапан «Белые грибы»",
-          fb: "<strong>Пока рано.</strong> С роллом так же, как с Воппером: сначала используй старую упаковку." },
-        { label: "Старая упаковка ролла", sub: "Продавить клапан «Сезонный»", ok: true,
-          fb: "<strong>Верно.</strong> Старая упаковка ролла — в работу первой, грибной вкус на ней отмечает клапан «Сезонный»." },
-        { label: "Старая упаковка ролла", sub: "Без отметки",
-          fb: "<strong>Не хватает маркировки.</strong> Без отметки грибной ролл не отличить от обычного. Какой клапан есть на старой упаковке?" },
+          fb: "<strong>Пока рано.</strong> С роллом так же, как с Воппером: сначала дорабатываем текущую упаковку." },
+        { label: "Текущая упаковка ролла", sub: "Продавить клапан «Сезонный»", ok: true,
+          fb: "<strong>Верно.</strong> Текущая упаковка ролла — в работу первой, грибной вкус на ней отмечает клапан «Сезонный»." },
+        { label: "Текущая упаковка ролла", sub: "Без отметки",
+          fb: "<strong>Не хватает маркировки.</strong> Без отметки грибной ролл не отличить от обычного. Какой клапан есть на текущей упаковке?" },
       ],
     },
     {
-      situation: "Прошла неделя, <b>старая упаковка Воппера закончилась</b>. Гость заказал Воппер Белые грибы. Как упакуешь?",
+      situation: "Прошла неделя, <b>текущая упаковка Воппера закончилась</b>. Гость заказал Воппер Белые грибы. Как упакуешь?",
       options: [
         { label: "Новая упаковка", sub: "Продавить клапан «Сезонный»",
           fb: "<strong>Такого клапана здесь нет.</strong> На новой упаковке вкус написан словами. Найди на крышке название грибного вкуса." },
         { label: "Новая упаковка", sub: "Продавить клапан «Белые грибы»", ok: true,
-          fb: "<strong>Верно.</strong> Старая закончилась — берёшь «Твой особенный Воппер» и продавливаешь клапан «Белые грибы»." },
+          fb: "<strong>Верно.</strong> Текущая закончилась — берёшь новую упаковку и продавливаешь клапан «Белые грибы»." },
         { label: "Новая упаковка", sub: "Без отметки",
           fb: "<strong>Не хватает маркировки.</strong> Даже на новой упаковке вкус нужно отметить — продави нужный клапан." },
       ],
@@ -389,7 +413,7 @@
       root.querySelector("[data-pq-body]").innerHTML = `
         <div class="ku-callout success">
           <span class="ku-callout__icon">${icon("i-check", "l")}</span>
-          <div><div class="ku-callout__title">Все ситуации разобраны</div><p>Есть старая упаковка — бери её и отмечай «Сезонный». Закончилась — переходи на новую и отмечай «Белые грибы».</p></div>
+          <div><div class="ku-callout__title">Все ситуации разобраны</div><p>Есть текущая упаковка — бери её и отмечай «Сезонный». Закончилась — переходи на новую и отмечай «Белые грибы».</p></div>
         </div>
         <div class="ku-space s"></div>
         <button class="ku-btn soft" data-pq-restart>${icon("i-refresh")} Пройти ещё раз</button>`;

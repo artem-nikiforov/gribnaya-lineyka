@@ -35,19 +35,11 @@
       homeDir: [-0.55, 0.62, 1], homeDist: 3.3,
       chipView: (k) => ["double", "triple", "cheese"].includes(k) ? [2.2, 0.35] : [2.1, 0.85],
       steps: (a) => [
-        () => { a.setLid(false); a.pressOnly(null); const h = a.home(); a.flyTo(h.pos, h.target, 1000); },
-        () => { a.setLid(false); a.pressOnly(null); a.flyTo(a.center.clone().add(new a.THREE.Vector3(0, 1, 0.42).normalize().multiplyScalar(a.R * 3.1)), a.center.clone(), 1000); },
-        () => { a.setLid(false); a.pressOnly("belye_griby"); a.viewFlap("belye_griby", 2.1, 0.85); },
-        () => {
-          a.setLid(false); a.pressOnly("double");
-          const b = new a.THREE.Box3(); ["double", "triple", "cheese"].forEach((k) => a.flaps[k] && a.flaps[k].meshes.forEach((m) => b.expandByObject(m)));
-          const C = b.getCenter(new a.THREE.Vector3());
-          a.flyTo(C.clone().add(new a.THREE.Vector3(-0.15, 0.45, 1).normalize().multiplyScalar(a.R * 2.4)), C, 1000);
-        },
-        () => { a.pressOnly(null); a.setLid(true); a.flyTo(a.center.clone().add(new a.THREE.Vector3(-0.6, 0.85, 1).normalize().multiplyScalar(a.R * 5.4)), a.center.clone().add(new a.THREE.Vector3(0, a.R * 0.45, -a.R * 0.35)), 1100); },
+        () => { a.setLid(false); a.pressOnly("belye_griby"); a.viewFlap("belye_griby", 2.1, 0.85); },      // что изменилось
+        () => { a.pressOnly(null); a.setLid(false); const h = a.home(); a.flyTo(h.pos, h.target, 1000); }, // сначала старая
       ],
       mission: {
-        key: "belye_griby", step: 2, doneId: "pack-3d", fb: "fb-pack3d",
+        key: "belye_griby", step: 0, doneId: "pack-3d", fb: "fb-pack3d",
         view: (a) => a.flyTo(a.center.clone().add(new a.THREE.Vector3(0.35, 0.8, -1).normalize().multiplyScalar(a.R * 3.2)), a.center.clone(), 1000),
         prompt: "Найди на коробке клапан «Белые грибы» и нажми на него. Коробку можно крутить.",
         wrong: (label) => `Это «${label}». Поищи клапан с подписью «Белые грибы» — он на ребре крышки, со стороны шарнира.`,
@@ -60,24 +52,12 @@
       homeDir: [-0.6, 0.3, 1], homeDist: 3.4,
       headlight: 0.9,                                   // грани ролла узкие: подсветка от камеры, чтобы боковое ребро не уходило в тень
       chipView: () => [2, 0.15],
-      steps: (a) => {
-        const column = () => {
-          const b = new a.THREE.Box3(); Object.values(a.flaps).forEach((f) => f.meshes.forEach((m) => b.expandByObject(m)));
-          return b.getCenter(new a.THREE.Vector3());
-        };
-        return [
-          () => { a.pressOnly(null); const h = a.home(); a.flyTo(h.pos, h.target, 1000); },
-          () => {
-            a.pressOnly(null);
-            const C = column(); const dir = C.clone().sub(a.center); dir.y = 0; dir.normalize(); dir.y = 0.12; dir.normalize();
-            a.flyTo(C.clone().add(dir.multiplyScalar(a.R * 2.3)), C, 1000);
-          },
-          () => { a.pressOnly("belye_griby"); a.viewFlap("belye_griby", 2, 0.15); },
-          () => { a.pressOnly(null); const h = a.home(); a.flyTo(h.pos.clone().add(new a.THREE.Vector3(a.R * 0.4, a.R * 0.25, 0)), h.target, 1100); },
-        ];
-      },
+      steps: (a) => [
+        () => { a.pressOnly("belye_griby"); a.viewFlap("belye_griby", 2, 0.15); },                          // что изменилось
+        () => { a.pressOnly(null); const h = a.home(); a.flyTo(h.pos, h.target, 1000); },                   // сначала старая
+      ],
       mission: {
-        key: "belye_griby", step: 2, doneId: "pack-3d-roll", fb: "fb-pack3d-roll",
+        key: "belye_griby", step: 0, doneId: "pack-3d-roll", fb: "fb-pack3d-roll",
         view: (a) => { const h = a.home(); a.flyTo(h.pos, h.target, 1000); },
         prompt: "Найди на упаковке ролла клапан «Белые грибы» и нажми на него. Упаковку можно крутить.",
         wrong: (label) => `Это «${label}». Клапаны вкусов — столбиком на боковом ребре. «Белые грибы» — второй снизу.`,
@@ -90,20 +70,18 @@
       homeDir: [-0.75, 0.45, 1], homeDist: 3.2,
       chipView: () => [2.4, 0.15],
       steps: (a) => [
-        () => { const h = a.home(); a.flyTo(h.pos, h.target, 1000); },                                   // лицевая сторона
-        () => a.flyTo(a.center.clone().add(new a.THREE.Vector3(-0.5, 0.15, 1).normalize().multiplyScalar(a.R * 2.1)),
-                      a.center.clone().add(new a.THREE.Vector3(0, -a.R * 0.3, 0)), 1000),                // клапаны маркировки
-        () => a.flyTo(a.center.clone().add(new a.THREE.Vector3(0.9, 0.8, 0.5).normalize().multiplyScalar(a.R * 2.8)),
-                      a.center.clone().add(new a.THREE.Vector3(0, a.R * 0.35, 0)), 1100),                // крышка и шкала времени
-        () => a.flyTo(a.center.clone().add(new a.THREE.Vector3(0.3, -0.85, 0.6).normalize().multiplyScalar(a.R * 3)),
-                      a.center.clone().add(new a.THREE.Vector3(0, -a.R * 0.45, 0)), 1100),               // дно
+        () => a.flyTo(a.center.clone().add(new a.THREE.Vector3(0.3, -0.9, 0.5).normalize().multiplyScalar(a.R * 2.9)),
+                      a.center.clone().add(new a.THREE.Vector3(0, -a.R * 0.5, 0)), 1000),                // дно
+        () => { const h = a.home(); a.flyTo(h.pos, h.target, 1000); },                                   // окно: как стоит сэндвич
+        () => a.flyTo(a.center.clone().add(new a.THREE.Vector3(-0.5, 0.1, 1).normalize().multiplyScalar(a.R * 2.1)),
+                      a.center.clone().add(new a.THREE.Vector3(0, -a.R * 0.32, 0)), 1000),               // клапаны и время
       ],
       mission: {
-        key: "zvezda", step: 1, doneId: "pack-3d-bk", fb: "fb-pack3d-bk",
+        key: "zvezda", step: 2, doneId: "pack-3d-bk", fb: "fb-pack3d-bk",
         view: (a) => a.viewFlap("zvezda", 2.4, 0.15),
-        prompt: "Найди на коробке клапан со звездой и продави его. Коробку можно крутить.",
-        wrong: (label) => `Это «${label}». Грибной Биг Кинг отмечают клапаном со звездой — он справа от «Классики».`,
-        right: "<strong>Есть!</strong> Клапан со звездой продавлен — так отмечают Биг Кинг Белые грибы.",
+        prompt: "Найди на коробке клапан «Звезда» и продави его. Коробку можно крутить.",
+        wrong: (label) => `Это «${label}». Биг Кинг Белые грибы отмечают клапаном «Звезда» — он справа от «Классики».`,
+        right: "<strong>Есть!</strong> Клапан «Звезда» продавлен — так отмечают Биг Кинг Белые грибы.",
       },
     },
   };

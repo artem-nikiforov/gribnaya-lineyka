@@ -133,6 +133,20 @@ body { background: var(--ku-bg); overflow-x: hidden; }
 }
 
 /* ── Карточки глав на обложке ────────────────────────────────────────── */
+/* Фото крупно по клику: рассмотреть маркировку */
+.gb-lightbox {
+  position: fixed; inset: 0; z-index: 200;
+  display: flex; align-items: center; justify-content: center;
+  padding: var(--ku-space-m);
+  background: color-mix(in srgb, var(--ku__cap-900) 72%, transparent);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+  animation: ku-fade var(--ku-dur-base) var(--ku-ease);
+}
+.gb-lightbox[hidden] { display: none; }
+.gb-lightbox img { max-width: min(96vw, 60rem); max-height: 92vh; border-radius: var(--ku-radius-l); box-shadow: var(--ku-shadow-l); }
+.gb-lightbox__close { position: absolute; top: var(--ku-space-m); right: var(--ku-space-m); background: var(--ku-card); }
+.gb-photo img, .gb-shelf__card img { cursor: zoom-in; }
+
 /* Выбор должности и роли на обложке */
 .gb-who { display: grid; gap: var(--ku-gap-m); grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); }
 .gb-who .gb-role { text-align: left; }
@@ -281,6 +295,7 @@ body { background: var(--ku-bg); overflow-x: hidden; }
 /* Шпаргалка сборки: слои сверху вниз */
 .gb-recipe { display: grid; gap: var(--ku-space-s); }
 .gb-recipe__part { display: grid; gap: 0.35em; }
+.gb-recipe__title i { font-style: normal; font-weight: 400; text-transform: none; letter-spacing: 0; color: var(--ku-text-muted); }
 .gb-recipe__title { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--ku-brand-strong); }
 .gb-recipe ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.3em; counter-reset: gb; }
 .gb-recipe li {
@@ -295,12 +310,10 @@ body { background: var(--ku-bg); overflow-x: hidden; }
 }
 .gb-recipe li:hover { transform: translateX(4px); border-color: color-mix(in srgb, var(--ku-brand) 40%, transparent); }
 .gb-recipe li::before {
-  content: counter(gb);
-  flex-shrink: 0;
-  width: 1.6em; height: 1.6em; display: grid; place-items: center;
-  border-radius: var(--ku-radius-pill);
-  background: var(--ku-brand-soft); color: var(--ku-brand-strong);
-  font-size: 0.75rem; font-weight: 700;
+  content: "";
+  width: 0.5em; height: 0.5em; flex-shrink: 0;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--ku-brand) 55%, transparent);
 }
 .gb-recipe li b { margin-left: auto; font-variant-numeric: tabular-nums; color: var(--ku-brand-strong); white-space: nowrap; }
 
@@ -696,6 +709,18 @@ body.gb-app-open { overflow: hidden; }
   cursor: grab; touch-action: none; box-shadow: var(--ku-shadow-brand);
 }
 .gb-fold-flap-grip:active { cursor: grabbing; }
+/* пока тянешь край, бумага просвечивает — видно, куда ложится логотип */
+.gb-wrap-stage.is-folding .gb-fold-flap { opacity: .72; }
+.gb-fold-center {
+  position: absolute; left: 4%; right: 4%; z-index: 5;
+  border-top: 2px dashed var(--ku-brand);
+  pointer-events: none;
+}
+.gb-fold-center span {
+  position: absolute; left: 0; top: -1.5em;
+  font-size: .68rem; font-weight: 700; color: var(--ku-brand-on);
+  background: var(--ku-brand); padding: .1em .5em; border-radius: var(--ku-radius-pill);
+}
 .gb-rot-btn { animation: gb-nudge 2.6s var(--ku-ease) infinite; }
 @keyframes gb-nudge { 0%, 80%, 100% { transform: rotate(0); } 88% { transform: rotate(-25deg); } }
 
@@ -1230,7 +1255,7 @@ button.gb-half__disc:hover { transform: scale(1.04) rotate(-3deg); }
   transform-origin: left center;
 }
 .gb-defrost__seg.is-thaw { background: linear-gradient(135deg, var(--ku__sky-500), color-mix(in srgb, var(--ku__sky-500) 55%, var(--ku__cap-700))); }
-.gb-defrost__seg.is-keep { background: var(--ku-grad-brand); }
+.gb-defrost__seg.is-keep { background: linear-gradient(135deg, color-mix(in srgb, var(--ku__sky-500) 70%, var(--ku__cap-600)), var(--ku__cap-700)); }
 .gb-defrost.ku-reveal .gb-defrost__seg { transform: scaleX(0.02); transition: transform 0.9s var(--ku-ease-out); }
 .gb-defrost.ku-reveal .gb-defrost__seg.is-keep { transition-delay: 0.35s; }
 .gb-defrost.visible .gb-defrost__seg { transform: none; }
@@ -1239,6 +1264,7 @@ button.gb-half__disc:hover { transform: scale(1.04) rotate(-3deg); }
 .gb-defrost__legend i { width: 0.8em; height: 0.8em; border-radius: 0.25em; }
 .gb-defrost__legend i.is-thaw { background: var(--ku__sky-500); }
 .gb-defrost__legend i.is-keep { background: var(--ku-brand); }
+.gb-defrost__legend i.is-board { background: var(--ku__cap-600); }
 
 /* Фото с подписью */
 .gb-photo { margin: 0; }

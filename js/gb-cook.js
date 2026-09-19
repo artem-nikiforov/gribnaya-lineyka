@@ -37,7 +37,7 @@
     pickle:  { label: "Маринованные огурцы", asset: "ing-pickle" },
     onion:   { label: "Свежий лук", asset: "ing-onion" },
     crispy:  { label: "Хрустящий лук", asset: "ing-crispy" },
-    mush:    { label: "Белые грибы", asset: "ing-mush" },
+    mush:    { label: "Грибы жареные", asset: "ing-mush" },
   };
 
   /* ── Тексты шагов (повторяются в блюдах) ──────────────────────────── */
@@ -67,7 +67,7 @@
   const topHint = "Чтобы добавить ингредиент, нажми на него — один или несколько раз.";
   const mushReq = (where) => ({
     ing: "mush", n: 2, scale: true,
-    err: `${where} нужно 2 ложки белых грибов — это 40 граммов. Проверь вес на весах.`,
+    err: `${where} нужно 2 ложки жареных грибов — это 40 граммов. Проверь вес на весах.`,
   });
   const slide = (line) => ({
     type: "slide", line,
@@ -188,7 +188,7 @@
         topGreens(1),
         T.joinBurger, slide("angus"), T.wrap,
         { type: "timemark", title: "Промаркируй упаковку Биг Кинг по времени", hint: "Нажми на временную шкалу.", err: "Добавь маркировку по времени хранения сэндвича: нажми на нужную отметку временной шкалы.", now: "14:05", correct: 2 },
-        marks("bigking", ["Звезда"], "Нажми на клапан со звездой.", "Промаркируй упаковку"),
+        marks("bigking", ["Звезда"], "Нажми на клапан «Звезда».", "Промаркируй упаковку"),
       ],
     },
     {
@@ -754,7 +754,8 @@
       const w = ctx.d.size === "whopper" ? 34 : 30;
       ctx.host.innerHTML = scene(wrapStage(w, line, `
           <div class="gb-fold-flap" id="gb-fold"></div>
-          <div class="gb-fold-flap-grip" id="gb-grip">${icon("i-up", "s")} Тяни край вверх</div>`, true),
+          <div class="gb-fold-flap-grip" id="gb-grip">${icon("i-up", "s")} Тяни край вверх</div>
+          <div class="gb-fold-center" id="gb-center"><span>середина сэндвича</span></div>`, true),
         `<button class="ku-btn primary" id="gb-fold-done">${icon("i-check")} Подтвердить заворот</button>`);
       const stage = ctx.host.querySelector("#gb-stage");
       const paper = ctx.host.querySelector("#gb-wpaper");
@@ -763,6 +764,9 @@
       const grip = ctx.host.querySelector("#gb-grip");
       const half = () => (sand.getBoundingClientRect().height / stage.getBoundingClientRect().height) * 100 / 2;
       sand.style.top = (line - half()) + "%";
+      const centerLine = ctx.host.querySelector("#gb-center");
+      const placeCenter = () => { centerLine.style.top = (line - half()) + "%"; };
+      placeCenter();
       let foldC = 100, drag = null;
       const applyFold = () => {
         const lead = 2 * foldC - 100;
@@ -771,6 +775,7 @@
         grip.style.top = lead + "%";
         paper.style.setProperty("--gb-cut", (100 - foldC) + "%");
         stage.style.setProperty("--gb-paper-h", stage.getBoundingClientRect().height + "px");
+        placeCenter();
       };
       const logoPct = () => 2 * foldC - LOGO_PCT;
       const centerPct = () => line - half();
@@ -778,6 +783,7 @@
       [flap, grip].forEach((el) => {
         el.addEventListener("pointerdown", (e) => {
           const r = stage.getBoundingClientRect();
+          stage.classList.add("is-folding");
           drag = { y: e.clientY, c: foldC, h: r.height };
           try { el.setPointerCapture(e.pointerId); } catch (_) {}
           e.preventDefault();
@@ -788,7 +794,7 @@
           foldC = Math.max(40, Math.min(100, drag.c + d / 2));
           applyFold();
         });
-        const end = () => { drag = null; };
+        const end = () => { drag = null; stage.classList.remove("is-folding"); };
         el.addEventListener("pointerup", end);
         el.addEventListener("pointercancel", end);
       });
