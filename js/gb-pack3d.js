@@ -84,6 +84,24 @@
         right: "<strong>Есть!</strong> Клапан «Звезда» продавлен — так отмечают Биг Кинг Белые грибы.",
       },
     },
+    angus: {
+      script: "assets/3d/angus.glb.js", glbVar: "GB_ANGUS_GLB",
+      flapOrder: ["klassika", "sezonnyi"],
+      homeDir: [0.75, 0.45, -1], homeDist: 3.4,        // лицевая сторона — та, где маркировка
+      chipView: () => [2.9, 0.12],
+      steps: (a) => [
+        () => { const h = a.home(); a.flyTo(h.pos, h.target, 1000); },                                   // как закрывается
+        () => a.flyTo(a.center.clone().add(new a.THREE.Vector3(0.5, 0.2, -1).normalize().multiplyScalar(a.R * 3.0)),
+                      a.center.clone().add(new a.THREE.Vector3(0, -a.R * 0.15, 0)), 1000),              // клапаны маркировки
+      ],
+      mission: {
+        key: "sezonnyi", step: 1, doneId: "pack-3d-angus", fb: "fb-pack3d-angus",
+        view: (a) => a.viewFlap("sezonnyi", 2.9, 0.12),
+        prompt: "Найди на коробке клапан «Сезонный» и продави его. Коробку можно крутить.",
+        wrong: (label) => `Это «${label}». Ангус Белые грибы отмечают клапаном «Сезонный» — он справа, у дальнего ребра.`,
+        right: "<strong>Есть!</strong> Клапан «Сезонный» продавлен — так отмечают Ангус Белые грибы.",
+      },
+    },
   };
 
   function loadScript(src) {

@@ -510,24 +510,54 @@
       </div>
     </section>
 
+    <!-- 3D-коробка Ангус: крутить пальцем (js/gb-pack3d.js, модель blender/angus) -->
     <section class="ku-section tight" aria-labelledby="gb-pack-angus">
       <div class="ku-wrap">
-        <span class="ku-eyebrow"><svg class="ku-ico s"><use href="#i-package"/></svg> Упаковка</span>
+        <span class="ku-eyebrow"><svg class="ku-ico s"><use href="#i-package"/></svg> Упаковка · 3D-модель</span>
         <div class="ku-space s"></div>
         <h3 class="ku-h2" id="gb-pack-angus">Кламшелл Ангус</h3>
         <div class="ku-space s"></div>
-        <p class="ku-lead">Кламшелл Ангус, клапан «Сезонный».</p>
+        <p class="ku-lead">Кламшелл Ангус, клапан «Сезонный». Потяни коробку пальцем или мышкой, чтобы рассмотреть её со всех сторон.</p>
         <div class="ku-space m"></div>
-        <div class="gb-split ku-reveal">
-          <div class="gb-pack-art gb-split__media" data-art="lid:angus:Сезонный"></div>
-          <div class="gb-split__text">
-            <div class="gb-must">
-              <div class="gb-must__row is-must"><svg class="ku-ico s"><use href="#i-check"/></svg><span><b>Клапан «Сезонный»</b> — отмечается всегда</span></div>
-              <div class="gb-must__row"><svg class="ku-ico s"><use href="#i-info"/></svg><span><b>Наклейка «Остро»</b> — если заказан острый сэндвич</span></div>
-              <div class="gb-must__row"><svg class="ku-ico s"><use href="#i-info"/></svg><span><b>«Двойная котлета»</b> — если заказан двойной сэндвич</span></div>
+
+        <div class="gb-3d" id="gb-3d-angus" data-model="angus">
+          <div class="gb-3d__col">
+            <div class="gb-3d__stage">
+              <img class="gb-3d__fallback" src="assets/3d/angus-fallback.webp" alt="Кламшелл Ангус в собранном виде">
+              <div class="gb-3d__loading" aria-live="polite"><span class="gb-3d__spinner"></span> Загружаем 3D-модель…</div>
+              <div class="gb-3d__hint" aria-hidden="true"><svg class="ku-ico s"><use href="#i-move"/></svg> Потяни, чтобы покрутить</div>
+              <div class="gb-3d__tip" role="status"></div>
+              <div class="gb-3d__tools">
+                <button type="button" class="gb-3d__tool icon" data-3d="reset" aria-label="Вернуть вид"><svg class="ku-ico"><use href="#i-refresh"/></svg></button>
+              </div>
             </div>
-            <p class="ku-small ku-soft" style="margin-top:1em">Клапан «Классика» не отжимай: он для Ангуса Пармеджано.</p>
+            <div class="gb-3d__chips-wrap">
+              <span class="ku-caption">Клапаны — нажми, чтобы продавить:</span>
+              <div class="gb-3d__chips"></div>
+            </div>
           </div>
+
+          <ol class="gb-3d__steps">
+            <li><button type="button" class="gb-3d-step is-active" data-step="0" aria-current="step">
+              <span class="gb-3d-step__num">1</span>
+              <span><b>Как закрывается</b>
+              <span class="gb-3d-step__text">Крышка откидывается назад, её язычок заходит внутрь за дальнюю стенку. Сэндвич ставят на дно целиком, без бумаги.</span></span>
+            </button></li>
+            <li><button type="button" class="gb-3d-step" data-step="1">
+              <span class="gb-3d-step__num">2</span>
+              <span><b>Маркировка: «Сезонный»</b>
+              <span class="gb-3d-step__text">Ангус Белые грибы отмечают клапаном «Сезонный» на дальнем ребре. «Классика» остаётся нетронутой — она для Ангуса Пармеджано.</span></span>
+            </button>
+            <button type="button" class="ku-btn soft gb-3d-step__action" data-mission><svg class="ku-ico"><use href="#i-target"/></svg> Найди и продави сам</button></li>
+          </ol>
+        </div>
+        <div class="ku-feedback" id="fb-pack3d-angus" aria-live="polite" data-ku-id="pack-3d-angus"></div>
+
+        <div class="ku-space m"></div>
+        <div class="gb-must">
+          <div class="gb-must__row is-must"><svg class="ku-ico s"><use href="#i-check"/></svg><span><b>Клапан «Сезонный»</b> — отмечается всегда</span></div>
+          <div class="gb-must__row"><svg class="ku-ico s"><use href="#i-info"/></svg><span><b>Наклейка «Остро»</b> — если заказан острый сэндвич</span></div>
+          <div class="gb-must__row"><svg class="ku-ico s"><use href="#i-info"/></svg><span><b>«Двойная котлета»</b> — если заказан двойной сэндвич</span></div>
         </div>
       </div>
     </section>
