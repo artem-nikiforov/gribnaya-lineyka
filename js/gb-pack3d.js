@@ -102,6 +102,24 @@
         right: "<strong>Есть!</strong> Клапан «Сезонный» продавлен — так отмечают Ангус Белые грибы.",
       },
     },
+    pita: {
+      script: "assets/3d/pita.glb.js", glbVar: "GB_PITA_GLB",
+      flapOrder: ["klassika", "sezonnyi"],
+      homeDir: [1, 0.45, 0.6], homeDist: 3.6,          // разворот к узкой грани с клапанами
+      chipView: () => [2.6, 0.1],
+      steps: (a) => [
+        () => { const h = a.home(); a.flyTo(h.pos, h.target, 1000); },                                   // как собран пакет
+        () => a.flyTo(a.center.clone().add(new a.THREE.Vector3(1, 0.2, 0.3).normalize().multiplyScalar(a.R * 2.8)),
+                      a.center.clone().add(new a.THREE.Vector3(0, -a.R * 0.05, 0)), 1000),             // клапаны маркировки
+      ],
+      mission: {
+        key: "sezonnyi", step: 1, doneId: "pack-3d-pita", fb: "fb-pack3d-pita",
+        view: (a) => a.viewFlap("sezonnyi", 2.6, 0.1),
+        prompt: "Найди на узкой грани клапан «Сезонный» и продави его. Упаковку можно крутить.",
+        wrong: (label) => `Это «${label}». Ангус Пита Белые грибы отмечают клапаном «Сезонный» — он ниже «Классики».`,
+        right: "<strong>Есть!</strong> Клапан «Сезонный» продавлен — так отмечают Ангус Пита Белые грибы.",
+      },
+    },
   };
 
   function loadScript(src) {
