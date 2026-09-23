@@ -358,12 +358,12 @@
           ${on ? `<circle cx="${x}" cy="${y}" r="${r}" ${f("rgba(0,0,0,.45)")}/>
                   <path d="M${x - 3.4} ${y} l2.4 2.8 l5 -5.6" style="fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"/>` : ""}
           <text x="${right ? x - r - 5 : x + r + 5}" y="${y + 3}" text-anchor="${right ? "end" : "start"}"
-                font-size="${o.zoom ? 7.5 : 6.5}" font-weight="700" ${f(P("brown"))}>${label.toUpperCase()}</text>
+                font-size="${o.zoom ? 7 : 6}" font-weight="700" ${f(P("brown"))}>${label.toUpperCase()}</text>
         </g>`;
       };
-      body += sideFlap(30, 86, "Острый") + sideFlap(30, 122, "Пармезан") +
-              sideFlap(170, 86, "4 сыра", true) + sideFlap(170, 122, "Гриль", true);
-      body += tab(54, 150, "Двойная котлета", 26, 19) + tab(100, 150, "Тройная котлета", 26, 19) + tab(146, 150, "Сыр", 26, 19);
+      body += sideFlap(30, 78, "Острый") + sideFlap(30, 134, "Пармезан") +
+              sideFlap(170, 78, "4 сыра", true) + sideFlap(170, 134, "Гриль", true);
+      body += tab(54, 156, "Двойная котлета", 26, 19) + tab(100, 156, "Тройная котлета", 26, 19) + tab(146, 156, "Сыр", 26, 19);
     } else if (type === "whopperOld") {
       body += shell(P("orange"), P("orange"));
       body += `${bkLogo(100, 80, 74)}

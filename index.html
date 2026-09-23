@@ -848,8 +848,8 @@
             <button type="button" class="ku-btn soft gb-3d-step__action" data-mission><svg class="ku-ico"><use href="#i-target"/></svg> Найди и продави сам</button></li>
             <li><button type="button" class="gb-3d-step" data-step="1">
               <span class="gb-3d-step__num">2</span>
-              <span><b>Сначала дорабатываем старую упаковку</b>
-              <span class="gb-3d-step__text">С роллом правило то же: пока есть старая упаковка, упаковывай в неё и отмечай «Сезонный».</span></span>
+              <span><b>Приехала новая — работаем с ней</b>
+              <span class="gb-3d-step__text">У ролла правило другое, чем у Воппера. Пока новой упаковки в ресторане нет, упаковывай в текущую и отмечай «Сезонный». Как только новая приехала — берёшь только её и отмечаешь «Белые грибы».</span></span>
             </button></li>
           </ol>
         </div>
@@ -861,20 +861,40 @@
       <div class="ku-wrap">
         <h3 class="ku-h2 ku-reveal">Какую упаковку брать</h3>
         <div class="ku-space s"></div>
-        <p class="ku-lead ku-reveal">Упаковки называются одинаково — «Твой особенный Воппер». Отличаются только клапаны вкуса. Сначала дорабатываем ту, что уже есть на станции.</p>
+        <p class="ku-lead ku-reveal">Упаковки называются одинаково — «Твой особенный Воппер». Отличаются только клапаны вкуса. А вот правило перехода у Воппера и ролла разное.</p>
         <div class="ku-space m"></div>
-        <div class="ku-grid cols-2">
+        <div class="ku-grid cols-2 gb-switch">
           <div class="ku-card ku-reveal" style="--d:1">
-            <span class="ku-badge neutral">Пока есть на станции</span>
-            <h4 class="ku-h4" style="margin:.5em 0">Текущая упаковка</h4>
-            <p class="ku-small ku-soft" style="margin:0 0 .8em">Сезонный вкус отмечает один общий клапан — без названия.</p>
-            <div class="gb-flaps"><span class="gb-flap is-key" style="--c:#2f7d4a">Клапан «Сезонный»</span></div>
+            <span class="ku-badge neutral">Воппер</span>
+            <h4 class="ku-h4" style="margin:.5em 0">Сначала дорабатываем текущую</h4>
+            <p class="ku-small ku-soft" style="margin:0 0 .8em">Пока текущая упаковка не закончилась, упаковывай в неё. Закончилась — переходишь на новую.</p>
+            <div class="gb-switch__row">
+              <div class="gb-switch__item">
+                <div class="gb-slot" data-asset="pack-old-clamshell"></div>
+                <span class="gb-flap is-key" style="--c:#2f7d4a">Клапан «Сезонный»</span>
+              </div>
+              <svg class="ku-ico gb-switch__arrow"><use href="#i-right"/></svg>
+              <div class="gb-switch__item">
+                <div class="gb-slot" data-asset="pack-new-clamshell"></div>
+                <span class="gb-flap is-key" style="--c:var(--gb-pack-blue)">Клапан «Белые грибы»</span>
+              </div>
+            </div>
           </div>
           <div class="ku-card ku-reveal" style="--d:2">
-            <span class="ku-badge solid">Когда текущая закончится</span>
-            <h4 class="ku-h4" style="margin:.5em 0">Новая упаковка</h4>
-            <p class="ku-small ku-soft" style="margin:0 0 .8em">У каждого вкуса свой клапан с названием. Для грибного — «Белые грибы».</p>
-            <div class="gb-flaps"><span class="gb-flap is-key" style="--c:var(--gb-pack-blue)">Клапан «Белые грибы»</span></div>
+            <span class="ku-badge solid">Ролл</span>
+            <h4 class="ku-h4" style="margin:.5em 0">Приехала новая — работаем с ней</h4>
+            <p class="ku-small ku-soft" style="margin:0 0 .8em">Пока новой упаковки в ресторане нет, упаковывай в текущую. Как только новая приехала — берёшь только её.</p>
+            <div class="gb-switch__row">
+              <div class="gb-switch__item">
+                <div class="gb-slot" data-asset="pack-old-roll"></div>
+                <span class="gb-flap is-key" style="--c:#2f7d4a">Клапан «Сезонный»</span>
+              </div>
+              <svg class="ku-ico gb-switch__arrow"><use href="#i-right"/></svg>
+              <div class="gb-switch__item">
+                <div class="gb-slot" data-asset="pack-new-roll"></div>
+                <span class="gb-flap is-key" style="--c:var(--gb-pack-blue)">Клапан «Белые грибы»</span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -882,7 +902,7 @@
         <div class="ku-wrap measure" style="padding:0">
           <div class="ku-callout ku-reveal" style="background:var(--ku-card)">
             <span class="ku-callout__icon"><svg class="ku-ico l"><use href="#i-bulb"/></svg></span>
-            <div><div class="ku-callout__title">Главное</div><p>Есть текущая упаковка — берём её и отмечаем «Сезонный». Закончилась — переходим на новую и отмечаем «Белые грибы». С роллом так же.</p></div>
+            <div><div class="ku-callout__title">Главное</div><p>Воппер: пока текущая упаковка не закончилась — берём её и отмечаем «Сезонный», потом переходим на новую с клапаном «Белые грибы». Ролл: как только новая упаковка приехала в ресторан — работаем только с ней.</p></div>
           </div>
         </div>
 

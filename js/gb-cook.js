@@ -111,7 +111,8 @@
     title: title || (part === "top" ? "Добавь на верхнюю часть булочки необходимые ингредиенты" : "Добавь на нижнюю часть булочки необходимые ингредиенты"),
     hint: topHint,
   });
-  const patty = (ing, err) => ({ ing, n: 1, err: err || `Сюда нужна котлета: ${ING[ing].label.toLowerCase()}.` });
+  const patty = (ing, err) => ({ ing, n: 1,
+    err: err || `Здесь нужна ${ING[ing].label.replace("Котлета", "котлета")} — следами от гриля вверх.` });
 
   /* ── Блюда ────────────────────────────────────────────────────────── */
   const DISHES = [
@@ -161,7 +162,7 @@
         Object.assign(topSauce("sauceM", 3, "тортильи"), { title: "Перед тобой разогретая тортилья. Начни с верхней части: добавь соус Белые грибы" }),
         build("bottom", [
           { ing: "mayo", n: 2, err: "Сразу на нижнюю часть тортильи — майонез: 2 нажатия." },
-          patty("pattyA", "Котлету кладут следами от гриля вверх. Разверни котлету и добавь её на тортилью ещё раз."),
+          patty("pattyA"),
           { ing: "cheddar", n: 1, err: "Сразу на котлету Ангус — 1 ломтик сыра Чеддер." },
           mushReq("На сыр Чеддер"),
         ], "Добавь на нижнюю часть тортильи необходимые ингредиенты"),
@@ -180,7 +181,7 @@
         build("bottom", [
           patty("pattyH"),
           { ing: "sauceM", n: 1, err: "На котлету Гамбургер — соус Белые грибы: 1 нажатие." },
-          patty("pattyH", "Нужна вторая котлета Гамбургер — следами от гриля вверх. Разверни котлету и добавь её ещё раз."),
+          patty("pattyH", "Нужна вторая котлета Гамбургер — следами от гриля вверх."),
           { ing: "cheddar", n: 2, err: "На котлету Гамбургер — 2 ломтика сыра Чеддер." },
           { ing: "pickle", n: 1, err: "Сразу на сыр Чеддер — 1 ломтик маринованного огурца." },
           { ing: "crispy", n: 1, err: "После маринованного огурца — 1 ложка хрустящего лука." },
@@ -216,7 +217,7 @@
         build("bottom", [
           patty("pattyW"),
           { ing: "sauceM", n: 2, err: "На первую котлету Воппер — соус Белые грибы: 2 нажатия." },
-          patty("pattyW", "Нужна вторая котлета Воппер — следами от гриля вверх. Разверни котлету и добавь её ещё раз."),
+          patty("pattyW", "Нужна вторая котлета Воппер — следами от гриля вверх."),
           { ing: "cheddar", n: 2, err: "На котлету Воппер — 2 ломтика сыра Чеддер." },
           { ing: "pickle", n: 4, err: "На сыр Чеддер — 4 ломтика маринованного огурца." },
           { ing: "sauceM", n: 2, err: "После маринованных огурцов — соус Белые грибы: 2 нажатия." },
@@ -254,9 +255,9 @@
         build("bottom", [
           patty("pattyW"),
           { ing: "sauceM", n: 2, err: "На первую котлету Воппер — соус Белые грибы: 2 нажатия." },
-          patty("pattyW", "Нужна вторая котлета Воппер — следами от гриля вверх. Разверни котлету и добавь её ещё раз."),
+          patty("pattyW", "Нужна вторая котлета Воппер — следами от гриля вверх."),
           { ing: "sauceM", n: 2, err: "На вторую котлету Воппер — соус Белые грибы: 2 нажатия." },
-          patty("pattyW", "Нужна третья котлета Воппер — следами от гриля вверх. Разверни котлету и добавь её ещё раз."),
+          patty("pattyW", "Нужна третья котлета Воппер — следами от гриля вверх."),
           { ing: "pickle", n: 4, err: "На котлету — 4 ломтика маринованного огурца." },
           { ing: "sauceM", n: 2, err: "После маринованных огурцов — соус Белые грибы: 2 нажатия." },
           { ing: "onion", n: 1, err: "Добавь свежий лук." },
@@ -592,7 +593,12 @@
             <span class="gb-half__tag ok">срез вверх</span>
           </div>
         </div>`;
-      ctx.host.innerHTML = scene(`<div class="gb-halves">${disc("top") + disc("bottom")}</div>`,
+      // бумагу уже положили на предыдущем шаге — показываем её под булочками
+      ctx.host.innerHTML = scene(
+        `<div class="gb-onpaper">
+           <img class="gb-onpaper__sheet" src="${PAPER_IMG}" alt="Оберточная бумага на столе" draggable="false">
+           <div class="gb-halves">${disc("top") + disc("bottom")}</div>
+         </div>`,
         `<button class="ku-btn primary" id="gb-place">${icon("i-layers")} Положить на бумагу</button>`);
       ctx.host.querySelector("#gb-place").addEventListener("click", () => ctx.ok());
     },
@@ -755,7 +761,8 @@
       ctx.host.innerHTML = scene(wrapStage(w, line, `
           <div class="gb-fold-flap" id="gb-fold"></div>
           <div class="gb-fold-flap-grip" id="gb-grip">${icon("i-up", "s")} Тяни край вверх</div>
-          <div class="gb-fold-center" id="gb-center"><span>середина сэндвича</span></div>`, true),
+          <div class="gb-fold-center" id="gb-center"></div>
+          <div class="gb-wrap-hint">Пунктир — середина сэндвича. Логотип должен лечь на него</div>`, true),
         `<button class="ku-btn primary" id="gb-fold-done">${icon("i-check")} Подтвердить заворот</button>`);
       const stage = ctx.host.querySelector("#gb-stage");
       const paper = ctx.host.querySelector("#gb-wpaper");
@@ -776,6 +783,7 @@
         paper.style.setProperty("--gb-cut", (100 - foldC) + "%");
         stage.style.setProperty("--gb-paper-h", stage.getBoundingClientRect().height + "px");
         placeCenter();
+        centerLine.classList.toggle("is-hit", Math.abs(logoPct() - centerPct()) <= FOLD_TOL);
       };
       const logoPct = () => 2 * foldC - LOGO_PCT;
       const centerPct = () => line - half();

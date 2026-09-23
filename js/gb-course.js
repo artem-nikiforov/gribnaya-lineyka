@@ -201,16 +201,31 @@
     // фото со станции — по клику крупно, чтобы рассмотреть маркировку
     const box = document.createElement("div");
     box.className = "gb-lightbox"; box.hidden = true;
-    box.innerHTML = `<button class="gb-tool gb-lightbox__close" aria-label="Закрыть">${icon("i-x")}</button><img alt="">`;
+    box.innerHTML = `<button class="gb-tool gb-lightbox__close" aria-label="Закрыть">${icon("i-x")}</button>` +
+      `<div class="gb-lightbox__stage"><img alt=""></div>` +
+      `<span class="gb-lightbox__hint">Нажми на фото, чтобы приблизить</span>`;
     document.body.appendChild(box);
-    const closeBox = () => { box.hidden = true; document.body.style.overflow = ""; };
+    const stage = box.querySelector(".gb-lightbox__stage");
+    const bigImg = box.querySelector("img");
+    const hint = box.querySelector(".gb-lightbox__hint");
+    const setZoom = (on, ev) => {                       // приближение к натуральному размеру
+      bigImg.classList.toggle("is-zoom", on);
+      hint.textContent = on ? "Нажми ещё раз, чтобы отдалить" : "Нажми на фото, чтобы приблизить";
+      if (!on) { stage.scrollTo(0, 0); return; }
+      const r = stage.getBoundingClientRect();
+      const px = ev ? (ev.clientX - r.left) / r.width : 0.5;
+      const py = ev ? (ev.clientY - r.top) / r.height : 0.5;
+      stage.scrollTo(px * (stage.scrollWidth - r.width), py * (stage.scrollHeight - r.height));
+    };
+    bigImg.addEventListener("click", (e) => { e.stopPropagation(); setZoom(!bigImg.classList.contains("is-zoom"), e); });
+    const closeBox = () => { box.hidden = true; document.body.style.overflow = ""; setZoom(false); };
     box.addEventListener("click", (e) => { if (e.target === box || e.target.closest(".gb-lightbox__close")) closeBox(); });
     document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeBox(); });
     $$(".gb-photo img, .gb-shelf__card img").forEach(img => {
       img.tabIndex = 0; img.setAttribute("role", "button");
       const open = () => {
-        box.querySelector("img").src = img.src;
-        box.querySelector("img").alt = img.alt;
+        bigImg.src = img.src; bigImg.alt = img.alt;
+        setZoom(false);
         box.hidden = false; document.body.style.overflow = "hidden";
       };
       img.addEventListener("click", open);
@@ -342,14 +357,14 @@
       ],
     },
     {
-      situation: "Следующий заказ — <b>Воппер Ролл Белые грибы</b>. На станции остались обе упаковки ролла: текущая и новая. Что выберешь?",
+      situation: "Следующий заказ — <b>Воппер Ролл Белые грибы</b>. В ресторан <b>уже приехала новая упаковка ролла</b>, на станции остались обе. Что выберешь?",
       options: [
-        { label: "Новая упаковка ролла", sub: "Продавить клапан «Белые грибы»",
-          fb: "<strong>Пока рано.</strong> С роллом так же, как с Воппером: сначала дорабатываем текущую упаковку." },
-        { label: "Текущая упаковка ролла", sub: "Продавить клапан «Сезонный»", ok: true,
-          fb: "<strong>Верно.</strong> Текущая упаковка ролла — в работу первой, грибной вкус на ней отмечает клапан «Сезонный»." },
-        { label: "Текущая упаковка ролла", sub: "Без отметки",
-          fb: "<strong>Не хватает маркировки.</strong> Без отметки грибной ролл не отличить от обычного. Какой клапан есть на текущей упаковке?" },
+        { label: "Новая упаковка ролла", sub: "Продавить клапан «Белые грибы»", ok: true,
+          fb: "<strong>Верно.</strong> У ролла правило другое, чем у Воппера: приехала новая упаковка — работаем только с ней и отмечаем «Белые грибы»." },
+        { label: "Текущая упаковка ролла", sub: "Продавить клапан «Сезонный»",
+          fb: "<strong>Это правило Воппера.</strong> Ролл переходит на новую упаковку сразу, как только она приехала в ресторан. Какую упаковку взять?" },
+        { label: "Новая упаковка ролла", sub: "Без отметки",
+          fb: "<strong>Не хватает маркировки.</strong> Без отметки грибной ролл не отличить от обычного. Какой клапан есть на новой упаковке?" },
       ],
     },
     {

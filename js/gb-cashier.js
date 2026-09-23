@@ -125,6 +125,22 @@
     }
   }
 
+  /* Как выглядит продавленный клапан и как — нетронутый: подсказка перед работой */
+  function flapLegend() {
+    const dot = (on) => `<svg viewBox="0 0 34 34" class="gb-cs__dot" aria-hidden="true">
+        <circle cx="17" cy="17" r="14.5" fill="none" stroke="rgba(91,51,38,.45)" stroke-width="1.4" stroke-dasharray="3 2.4"/>
+        <circle cx="17" cy="17" r="11" fill="#1f5fbf"/>
+        ${on ? `<circle cx="17" cy="17" r="11" fill="rgba(0,0,0,.45)"/>
+                <circle cx="17" cy="15" r="9" fill="none" stroke="rgba(0,0,0,.35)" stroke-width="3.3"/>
+                <path d="M12.4 17 l3.3 3.7 l6.6 -7.5" fill="none" stroke="#fff" stroke-width="2.6"
+                      stroke-linecap="round" stroke-linejoin="round"/>` : ""}
+      </svg>`;
+    return `<div class="gb-cs__legend">
+        <span>${dot(true)} продавлен — вкус отмечен</span>
+        <span>${dot(false)} не тронут</span>
+      </div>`;
+  }
+
   /* ── Заказ ────────────────────────────────────────────────────────── */
   function renderOrder(o, training) {
     const sh = S();
@@ -148,6 +164,7 @@
             <span class="ku-eyebrow">${icon("i-bag", "s")} Заказ гостя</span>
             <b class="gb-cs__dish">${o.order}</b>
             <p class="ku-small ku-soft" style="margin:.2em 0 0">Что должно быть на упаковке — решаешь сам: сверяй название с клапанами и наклейками.</p>
+            ${flapLegend()}
           </aside>
 
           <div class="gb-cs__bin">
