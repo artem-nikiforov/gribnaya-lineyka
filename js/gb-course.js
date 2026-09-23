@@ -126,9 +126,21 @@
         box.appendChild(s);
       }
     });
-    // Иллюстрации на карточках оглавления
+    // Иллюстрации на карточках оглавления. Главы — реальные картинки: упаковки
+    // отрендерены из 3D-моделей курса, соус и грибы — ассеты тренажёра, станция —
+    // обложка тренажёра повара. Остальные ключи — векторные сцены ниже.
+    const CARD_IMG = {
+      cooking:     ["assets/img/chapter-cooking.webp", "Упаковки Биг Кинг, Ангус, Ангус Пита и «Твой особенный Воппер»", "contain"],
+      ingredients: ["assets/img/chapter-ingredients.webp", "Соус Белые грибы в тубе с пистолетом и жареные грибы в пэне", "contain"],
+      trainer:     ["assets/img/chapter-trainer.webp", "Станция сборки: борт с ингредиентами и бумага для сэндвича", "cover"],
+    };
     $$("[data-cardart]").forEach(el => {
       const A = window.GBArt, k = el.dataset.cardart;
+      if (CARD_IMG[k]) {
+        const [src, alt, fit] = CARD_IMG[k];
+        el.innerHTML = `<img class="gb-chapter-card__img is-${fit}" src="${src}" alt="${alt}" loading="lazy" decoding="async">`;
+        return;
+      }
       if (k === "video") el.innerHTML = A.svg("0 0 320 200", `
         <circle cx="250" cy="40" r="80" style="fill:rgba(255,255,255,.08)"/>
         <g transform="translate(24 60) scale(1.05)">${A.porcini().replace(/^<svg[^>]*>|<\/svg>$/g, "")}</g>

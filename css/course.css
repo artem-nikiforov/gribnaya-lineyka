@@ -1355,3 +1355,9 @@ button.gb-half__disc:hover { transform: scale(1.04) rotate(-3deg); }
 .gb-cs__legend { display: flex; flex-wrap: wrap; gap: 0.5em 1.1em; margin-top: 0.8em; }
 .gb-cs__legend span { display: inline-flex; align-items: center; gap: 0.4em; font-size: 0.78rem; font-weight: 600; }
 .gb-cs__dot { width: 1.6rem; height: 1.6rem; flex: none; }
+
+/* Обложки глав — реальные картинки поверх фирменного градиента */
+.gb-chapter-card__img { position: absolute; inset: 0; width: 100%; height: 100%; transition: transform var(--ku-dur-slow) var(--ku-ease-out); }
+.gb-chapter-card__img.is-contain { object-fit: contain; padding: 3%; filter: drop-shadow(0 10px 14px rgba(40,18,6,.28)); }
+.gb-chapter-card__img.is-cover { object-fit: cover; }
+.gb-chapter-card:hover .gb-chapter-card__img { transform: scale(1.05); }
