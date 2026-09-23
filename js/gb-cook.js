@@ -593,12 +593,9 @@
             <span class="gb-half__tag ok">срез вверх</span>
           </div>
         </div>`;
-      // бумагу уже положили на предыдущем шаге — показываем её под булочками
+      // бумагу уже положили на предыдущем шаге — держим её под булочками
       ctx.host.innerHTML = scene(
-        `<div class="gb-onpaper">
-           <img class="gb-onpaper__sheet" src="${PAPER_IMG}" alt="Оберточная бумага на столе" draggable="false">
-           <div class="gb-halves">${disc("top") + disc("bottom")}</div>
-         </div>`,
+        `<div class="gb-onpaper"><div class="gb-halves">${disc("top") + disc("bottom")}</div></div>`,
         `<button class="ku-btn primary" id="gb-place">${icon("i-layers")} Положить на бумагу</button>`);
       ctx.host.querySelector("#gb-place").addEventListener("click", () => ctx.ok());
     },
@@ -610,7 +607,7 @@
       let i = 0, c = 0, weighed = false, lastDone = null;
 
       ctx.host.innerHTML = `
-        ${scene(`<div class="gb-halves" id="gb-halves"></div><div id="gb-extra" style="display:contents"></div>`)}
+        ${scene(`<div class="gb-onpaper"><div class="gb-halves" id="gb-halves"></div></div><div id="gb-extra" style="display:contents"></div>`)}
         <div class="gb-station">
           <div class="gb-station__label"><span>Борт</span><span>Нажимай на ингредиент — один или несколько раз</span></div>
           <div class="gb-station__grid" id="gb-grid">
