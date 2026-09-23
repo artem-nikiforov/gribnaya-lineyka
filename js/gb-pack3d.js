@@ -32,6 +32,7 @@
     clamshell: {
       script: "assets/3d/clamshell.glb.js", glbVar: "GB_CLAMSHELL_GLB",
       flapOrder: ["novinka", "belye_griby", "ostryi", "parmezan", "4syra", "gril", "double", "triple", "cheese"],
+      radio: [["novinka", "belye_griby", "ostryi", "parmezan", "4syra", "gril"], ["double", "triple"]],   // «Сыр» — отдельно
       homeDir: [-0.55, 0.62, 1], homeDist: 3.3,
       chipView: (k) => ["double", "triple", "cheese"].includes(k) ? [2.2, 0.35] : [2.1, 0.85],
       steps: (a) => [
@@ -49,6 +50,7 @@
     roll: {
       script: "assets/3d/roll.glb.js", glbVar: "GB_ROLL_GLB",
       flapOrder: ["parmezan", "gril", "4syra", "ostryi", "belye_griby", "novinka"],
+      radio: [["parmezan", "gril", "4syra", "ostryi", "belye_griby", "novinka"]],
       homeDir: [-0.6, 0.3, 1], homeDist: 3.4,
       headlight: 0.9,                                   // грани ролла узкие: подсветка от камеры, чтобы боковое ребро не уходило в тень
       chipView: () => [2, 0.15],
@@ -67,6 +69,7 @@
     bigking: {
       script: "assets/3d/bigking.glb.js", glbVar: "GB_BIGKING_GLB",
       flapOrder: ["klassika", "zvezda"],
+      radio: [["klassika", "zvezda"]],
       homeDir: [-0.75, 0.45, 1], homeDist: 3.2,
       chipView: () => [2.4, 0.15],
       steps: (a) => [
@@ -87,6 +90,7 @@
     angus: {
       script: "assets/3d/angus.glb.js", glbVar: "GB_ANGUS_GLB",
       flapOrder: ["klassika", "sezonnyi"],
+      radio: [["klassika", "sezonnyi"]],
       homeDir: [0.75, 0.45, -1], homeDist: 3.4,        // лицевая сторона — та, где маркировка
       chipView: () => [2.9, 0.12],
       steps: (a) => [
@@ -105,6 +109,7 @@
     pita: {
       script: "assets/3d/pita.glb.js", glbVar: "GB_PITA_GLB",
       flapOrder: ["klassika", "sezonnyi"],
+      radio: [["klassika", "sezonnyi"]],
       homeDir: [1, 0.45, 0.6], homeDist: 3.6,          // разворот к узкой грани с клапанами
       chipView: () => [2.6, 0.1],
       steps: (a) => [
@@ -260,7 +265,15 @@
         flyTo(C.clone().add(dir.multiplyScalar(R * dist)), C, 900);
       }
 
-      function setPressed(k, on) { if (flaps[k]) { flaps[k].target = on ? 1 : 0; paintChips(); } }
+      // Клапаны вкуса — радиокнопки: продавил один, соседние по группе отжимаются.
+      // «Классика» и «Сезонный» (как и два вкуса на кламшелле) вместе не бывают.
+      const radioOf = (k) => (cfg.radio || []).find((g) => g.includes(k)) || [];
+      function setPressed(k, on) {
+        if (!flaps[k]) return;
+        if (on) radioOf(k).forEach((o) => { if (o !== k && flaps[o]) flaps[o].target = 0; });
+        flaps[k].target = on ? 1 : 0;
+        paintChips();
+      }
       function setLid(open) { if (lid) { lid.target = open ? 1 : 0; paintTools(); } }
 
       /* ── Шаги-экскурсия ──────────────────────────────────────────── */
