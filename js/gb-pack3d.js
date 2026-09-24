@@ -73,14 +73,12 @@
       homeDir: [-0.75, 0.45, 1], homeDist: 3.2,
       chipView: () => [2.4, 0.15],
       steps: (a) => [
-        () => a.flyTo(a.center.clone().add(new a.THREE.Vector3(0.3, -0.9, 0.5).normalize().multiplyScalar(a.R * 2.9)),
-                      a.center.clone().add(new a.THREE.Vector3(0, -a.R * 0.5, 0)), 1000),                // дно
         () => { const h = a.home(); a.flyTo(h.pos, h.target, 1000); },                                   // окно: как стоит сэндвич
         () => a.flyTo(a.center.clone().add(new a.THREE.Vector3(-0.5, 0.1, 1).normalize().multiplyScalar(a.R * 2.1)),
                       a.center.clone().add(new a.THREE.Vector3(0, -a.R * 0.32, 0)), 1000),               // клапаны и время
       ],
       mission: {
-        key: "zvezda", step: 2, doneId: "pack-3d-bk", fb: "fb-pack3d-bk",
+        key: "zvezda", step: 1, doneId: "pack-3d-bk", fb: "fb-pack3d-bk",
         view: (a) => a.viewFlap("zvezda", 2.4, 0.15),
         prompt: "Найди на коробке клапан «Звезда» и продави его. Коробку можно крутить.",
         wrong: (label) => `Это «${label}». Биг Кинг Белые грибы отмечают клапаном «Звезда» — он справа от «Классики».`,

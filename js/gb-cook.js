@@ -65,6 +65,9 @@
     scaleNoWeigh: "Пока привыкаешь к новой порции, проверяй вес грибов на весах. Нажми «Проверить на весах».",
   };
   const topHint = "Чтобы добавить ингредиент, нажми на него — один или несколько раз.";
+  // Какая булочка у блюда: подпись у половинок, чтобы не взять не ту
+  const BUN = { angus: "сырной булочки", bigking: "картофельной булочки", whopper: "булочки" };
+  const halfLabel = (size, part) => `${part === "top" ? "Верхняя" : "Нижняя"} часть ${BUN[size] || "булочки"}`;
   const mushReq = (where) => ({
     ing: "mush", n: 2, scale: true,
     err: `${where} нужно 2 ложки жареных грибов — это 40 граммов. Проверь вес на весах.`,
@@ -303,7 +306,7 @@
         <div class="gb-splash__card">
           <span class="ku-eyebrow"><svg class="ku-ico s"><use href="#i-utensils"/></svg> Повар</span>
           <h2 class="ku-h2">Давай потренируемся!</h2>
-          <p class="ku-lead ku-mx-auto">На экран заказов поступят блюда из грибной линейки. Собери и упакуй каждый заказ без ошибок.</p>
+          <p class="ku-lead ku-mx-auto">На экран заказов поступят блюда коллекции Белые Грибы. Собери и упакуй каждый заказ без ошибок.</p>
           <div class="gb-slot" data-asset="cook-start"></div>
           <div class="gb-splash__rules ku-card">
             <ul>
@@ -587,7 +590,7 @@
       // Булочки уже разрезаны и лежат срезом вверх — их нужно только положить на бумагу
       const disc = (part) => `
         <div class="gb-half">
-          <span class="gb-half__label">${part === "top" ? "Верхняя часть" : "Нижняя часть"}</span>
+          <span class="gb-half__label">${halfLabel(ctx.d.size, part)}</span>
           <div class="gb-half__disc">
             ${ART().svg("0 0 200 200", ART().bun(true, { sesame: part === "top" }))}
             <span class="gb-half__tag ok">срез вверх</span>
@@ -932,7 +935,7 @@
       const active = step.part === p;
       const tag = clickable ? "button" : "div";
       return `<div class="gb-half ${step.part ? (active ? "is-active" : "is-idle") : ""}">
-        <span class="gb-half__label">${p === "top" ? "Верхняя часть" : "Нижняя часть"}</span>
+        <span class="gb-half__label">${halfLabel(dish.d.size, p)}</span>
         <${tag} class="gb-half__disc" data-part="${p}" ${clickable ? `aria-label="${p === "top" ? "Верхняя" : "Нижняя"} часть сэндвича"` : ""}>
           ${ART().svg("0 0 200 200", ART().bun(true) + layersSvg(dish.layers[p], animateLast && active))}
         </${tag}>

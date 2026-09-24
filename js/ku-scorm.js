@@ -295,8 +295,23 @@
     save();
     document.querySelectorAll("[data-ku-complete]").forEach((b) => {
       b.classList.add("is-completed");
+      b.disabled = true;
+      b.setAttribute("aria-disabled", "true");
     });
     document.dispatchEvent(new CustomEvent("ku:completed"));
+    // В popup LMS браузер разрешает закрыть окно через window.close().
+    // Во встроенном iframe закрывает контейнер сама LMS по сообщению.
+    lmsFinish();
+    setTimeout(() => {
+      try {
+        if (window.parent && window.parent !== window) {
+          window.parent.postMessage({ type: "ku:close-course", courseId: COURSE_ID }, "*");
+        }
+      } catch (e) {}
+      try {
+        if (window.opener && !window.opener.closed) window.close();
+      } catch (e) {}
+    }, 100);
   }
   function bindComplete() {
     document.querySelectorAll("[data-ku-complete]").forEach((btn) =>

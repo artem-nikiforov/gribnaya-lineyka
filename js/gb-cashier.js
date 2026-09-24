@@ -184,6 +184,7 @@
           <p class="ku-caption ku-center" id="gb-hand-note"></p>
           <div class="ku-row center">
             <button class="ku-btn soft" id="gb-hand-flip">${icon("i-rotate")} Показать лицевую сторону</button>
+            <button class="ku-btn soft" id="gb-hand-zoom" aria-pressed="false">${icon("i-zoom")} Приблизить</button>
             <button class="ku-btn primary" id="gb-give">${icon("i-check")} Отдать гостю</button>
           </div>
         </div>
@@ -193,7 +194,39 @@
     sh.scrollTop();
   }
 
-  const pkgSvg = (it, zoom) => ART().pack(it.v.pack, { view: it.view, marks: it.v.marks, zoom });
+  /* Наклейка «Остро» клеится на крышку снаружи — её видно и на закрытой упаковке.
+     Упаковки — рендеры 3D-моделей курса по макетам (blender/render_cashier.py):
+     закрытая упаковка на бине и сторона с клапанами, где нужные клапаны продавлены
+     так же, как их продавливают на станции. Наклейки «Остро» и модификаторы
+     кладутся поверх. У питы 3D-модель пока в работе — у неё прежний рисунок. */
+  const IMG = "assets/trainer/cashier/";
+  const CLOSED = { angus: "angus-closed", bigking: "bigking-closed", whopper: "clamshell-closed" };
+  const FOCUS = { angus: [0.5, 0.78], bigking: [0.42, 0.8], whopper: [0.5, 0.7], pita: [0.5, 0.85] };   // где клапаны на картинке
+  function marksImg(v) {
+    const has = (l) => v.marks.some((m) => m.label === l);
+    if (v.pack === "angus") return "angus-sezonnyi";
+    if (v.pack === "bigking") return has("Классика") ? "bigking-klassika" : "bigking-zvezda";
+    if (v.pack === "whopper") {
+      const dbl = has("Двойная котлета"), tri = has("Тройная котлета"), ch = has("Сыр");
+      return tri ? "whopper-bg-triple" : dbl && ch ? "whopper-bg-dbl-cheese" : dbl ? "whopper-bg-double" : ch ? "whopper-bg-cheese" : "whopper-bg";
+    }
+    return null;
+  }
+  function overlays(v) {
+    return v.marks.map((m) => {
+      if (m.kind === "sticker") return `<span class="gb-sticker gb-sticker--hot">ОСТРО</span>`;
+      if (m.kind === "mod") return `<span class="gb-sticker gb-sticker--mod">${m.key === "minus" ? "БЕЗ" : "+"} ${m.label.toUpperCase()}</span>`;
+      if (m.kind === "icon" && v.pack === "angus") return `<span class="gb-sticker gb-sticker--mark">ДВОЙНАЯ КОТЛЕТА</span>`;
+      return "";
+    }).join("");
+  }
+  const pkgSvg = (it, zoom) => {
+    const v = it.v;
+    const file = it.view === "front" ? CLOSED[v.pack] : marksImg(v);
+    if (!file) return ART().pack(v.pack, { view: it.view, marks: v.marks, zoom });
+    const alt = `${PACK_NAME[v.pack]}${it.view === "front" ? ", закрыта" : ": " + describe(v)}`;
+    return `<span class="gb-pkimg"><img src="${IMG + file}.webp" alt="${alt}" draggable="false">${it.view === "front" ? overlays({ ...v, marks: v.marks.filter((m) => m.kind === "sticker") }) : overlays(v)}</span>`;
+  };
 
   function drawBin(st) {
     const bin = document.getElementById("gb-bin");
@@ -230,7 +263,7 @@
       hands.hidden = false; drawHand(false);
       document.getElementById("gb-give").focus();
     };
-    const back = () => { hands.hidden = true; st.hand = null; drawBin(st); };
+    const back = () => { hands.hidden = true; st.hand = null; view.classList.remove("is-zoom"); drawBin(st); };
 
     bin.addEventListener("click", (e) => {
       const open = e.target.closest("[data-open]");
@@ -240,6 +273,17 @@
     });
     document.getElementById("gb-hand-back").addEventListener("click", back);
     hands.addEventListener("click", (e) => { if (e.target === hands) back(); });
+    document.getElementById("gb-hand-zoom").addEventListener("click", (e) => {
+      const on = !view.classList.contains("is-zoom");
+      view.classList.toggle("is-zoom", on); e.currentTarget.setAttribute("aria-pressed", on);
+      e.currentTarget.innerHTML = `${icon("i-zoom")} ${on ? "Отдалить" : "Приблизить"}`;
+      if (on) {                                          // приближаем туда, где маркировка
+        const it = st.items[st.hand];
+        const [fx, fy] = it.view === "front" ? [0.5, 0.5] : (FOCUS[it.v.pack] || [0.5, 0.5]);
+        view.scrollLeft = fx * view.scrollWidth - view.clientWidth / 2;
+        view.scrollTop = fy * view.scrollHeight - view.clientHeight / 2;
+      }
+    });
     document.getElementById("gb-hand-flip").addEventListener("click", () => {
       const it = st.items[st.hand];
       it.view = it.view === "front" ? "marks" : "front";
@@ -258,7 +302,7 @@
         }
         if (!correct) {
           st.showCorrect = true; back();
-          await sh.feedback({ title: "Не то блюдо", text: `На упаковке блюда «${st.o.order}» должен быть продавлен один клапан «Сезонный» — и больше ничего. Нужная упаковка подсвечена: возьми её и отдай гостю.`, primary: "Понятно" });
+          await sh.feedback({ title: "Не то блюдо", text: `На упаковке блюда «${st.o.order}» продавлен один клапан «Сезонный» — и больше никаких отметок. Нужная упаковка подсвечена: возьми её и отдай гостю.`, primary: "Понятно" });
           return;
         }
         sh.burst();

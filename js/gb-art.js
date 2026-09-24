@@ -161,20 +161,57 @@
   const layerArt = {
     sauceM: (i) => floret(SAUCE_POS[i % SAUCE_POS.length], V("sauce"), "#d6c4a4", false, i),
     mayo: (i) => floret(SAUCE_POS[(i + 1) % SAUCE_POS.length], V("mayo"), "#fffaf0", true),
-    iceberg: () => Array.from({ length: 34 }, (_, k) => {
-      const r = rng(k + 11); const a = r() * Math.PI * 2, d = Math.sqrt(r()) * 70;
-      const x = 100 + Math.cos(a) * d, y = 100 + Math.sin(a) * d;
-      return `<path d="M${x} ${y} q9 -9 18 0 q-9 4 -18 0" ${f(k % 3 ? V("lettuce") : "#c4e09a")}/>`;
+    // Айсберг — крупные рваные листья с белыми прожилками (по фото сборки со станции)
+    iceberg: () => Array.from({ length: 26 }, (_, k) => {
+      const r = rng(k + 11); const a = (k / 26) * Math.PI * 2 + r() * 0.6, d = 12 + Math.sqrt(r()) * 50;
+      const x = 100 + Math.cos(a) * d, y = 100 + Math.sin(a) * d, rot = r() * 360, s = 17 + r() * 11;
+      const pts = Array.from({ length: 11 }, (_, j) => {
+        const t = (j / 11) * Math.PI * 2, w = s * (0.72 + r() * 0.36) * (j % 2 ? 0.86 : 1);
+        return `${(Math.cos(t) * w * 1.25).toFixed(1)},${(Math.sin(t) * w * 0.8).toFixed(1)}`;
+      }).join(" ");
+      const light = k % 3 === 0;
+      return `<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${rot.toFixed(0)})">
+        <polygon points="${pts}" style="fill:${light ? "#d4ecae" : V("lettuce")};stroke:#5f8f33;stroke-width:1.4;stroke-linejoin:round"/>
+        <path d="M${-s} 0 Q0 ${-s * 0.25} ${s} 0" style="fill:none;stroke:#f1f8e2;stroke-width:2.6;stroke-linecap:round;opacity:.9"/>
+        <path d="M${-s * 0.3} ${-s * 0.1} l${s * 0.25} ${-s * 0.4} M${s * 0.3} ${-s * 0.1} l${s * 0.2} ${s * 0.4}" style="fill:none;stroke:#f1f8e2;stroke-width:1.6;stroke-linecap:round;opacity:.75"/>
+      </g>`;
     }).join(""),
-    tomato: (i) => { const [x, y] = TOMATO_POS[i % 3]; return `<circle cx="${x}" cy="${y}" r="34" ${f(V("tomato"))}/><circle cx="${x}" cy="${y}" r="24" ${f("#f07b5f")}/>${[0, 72, 144, 216, 288].map(a => `<ellipse cx="${x + Math.cos(a * Math.PI / 180) * 14}" cy="${y + Math.sin(a * Math.PI / 180) * 14}" rx="4" ry="2.4" ${f("#fbd2a0")}/>`).join("")}`; },
+    // Томат — срез: кожица, мякоть, семенные камеры с семечками, светлый центр
+    tomato: (i) => {
+      const [x, y] = TOMATO_POS[i % 3], R = 37;
+      const cells = [0, 60, 120, 180, 240, 300].map((deg) => {
+        const t = deg * Math.PI / 180, cx = x + Math.cos(t) * R * 0.5, cy = y + Math.sin(t) * R * 0.5;
+        const seeds = [-0.35, 0, 0.35].map((o) => `<ellipse cx="${(cx + Math.cos(t + o) * 5).toFixed(1)}" cy="${(cy + Math.sin(t + o) * 5).toFixed(1)}" rx="2.1" ry="1.3" transform="rotate(${deg} ${(cx + Math.cos(t + o) * 5).toFixed(1)} ${(cy + Math.sin(t + o) * 5).toFixed(1)})" ${f("#f6dc8f")}/>`).join("");
+        return `<ellipse cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" rx="12" ry="8" transform="rotate(${deg} ${cx.toFixed(1)} ${cy.toFixed(1)})" ${f("#f2885f")}/>${seeds}`;
+      }).join("");
+      return `<circle cx="${x}" cy="${y}" r="${R}" style="fill:#c7261a;stroke:#8f1a10;stroke-width:1.5"/>
+        <circle cx="${x}" cy="${y}" r="${R - 4}" ${f("#e0402c")}/>${cells}
+        <circle cx="${x}" cy="${y}" r="7" ${f("#f6b59d")}/>
+        <path d="M${x - R * 0.55} ${y - R * 0.62} A${R * 0.85} ${R * 0.85} 0 0 1 ${x + R * 0.3} ${y - R * 0.8}" style="fill:none;stroke:#fff;stroke-width:3;stroke-linecap:round;opacity:.35"/>`;
+    },
     patty: (i, o) => patty(o && o.r || 80, true, 3 + i),
     cheddar: (i) => `<rect x="42" y="42" width="116" height="116" rx="6" transform="rotate(${45 + i * 12} 100 100)" ${f(V("cheese"))} opacity="0.95"/>`,
     hot: () => [70, 52, 34].map(r => `<circle cx="100" cy="100" r="${r}" style="fill:none;stroke:${V("hot")};stroke-width:5;opacity:.9"/>`).join(""),
-    mush: (i) => Array.from({ length: 14 }, (_, k) => {
-      const r = rng((i + 1) * 100 + k); const a = r() * Math.PI * 2, d = Math.sqrt(r()) * 62;
-      const x = 100 + Math.cos(a) * d, y = 100 + Math.sin(a) * d;
-      return `<path d="M${x} ${y} q7 -11 14 0 l-3 8 h-8 z" ${f(k % 2 ? V("mush") : "#c9955f")}/>`;
-    }).join(""),
+    // Грибы жареные — плотная глянцевая горка в центре: тёмные шляпки в оливково-коричневом соке
+    mush: (i) => {
+      const r = rng((i + 1) * 131);
+      const cx = 100 + (i ? 6 : -4), cy = 100 + (i ? 5 : -6), R = 40;
+      const blob = Array.from({ length: 14 }, (_, j) => {
+        const t = (j / 14) * Math.PI * 2, w = R * (0.82 + r() * 0.3);
+        return `${(cx + Math.cos(t) * w).toFixed(1)},${(cy + Math.sin(t) * w * 0.92).toFixed(1)}`;
+      }).join(" ");
+      const bits = Array.from({ length: 30 }, (_, k) => {
+        const a = r() * Math.PI * 2, d = Math.sqrt(r()) * R * 0.85;
+        const x = cx + Math.cos(a) * d, y = cy + Math.sin(a) * d, w = 4 + r() * 5, h = 3 + r() * 4;
+        const dark = k % 3 !== 0;
+        return `<rect x="${(x - w / 2).toFixed(1)}" y="${(y - h / 2).toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" rx="1.6" transform="rotate(${(r() * 180).toFixed(0)} ${x.toFixed(1)} ${y.toFixed(1)})" ${f(dark ? "#2c1f12" : "#a58556")}/>`;
+      }).join("");
+      const gloss = Array.from({ length: 7 }, () => {
+        const a = r() * Math.PI * 2, d = Math.sqrt(r()) * R * 0.7;
+        return `<ellipse cx="${(cx + Math.cos(a) * d).toFixed(1)}" cy="${(cy + Math.sin(a) * d).toFixed(1)}" rx="3.4" ry="1.6" ${f("#fff")} opacity=".45"/>`;
+      }).join("");
+      return `<polygon points="${blob}" style="fill:#5f4b2a;stroke:#3a2c17;stroke-width:1.6;stroke-linejoin:round"/>${bits}${gloss}`;
+    },
     pickle: (i) => { const pos = [[72, 72], [128, 72], [72, 128], [128, 128], [100, 100]][i % 5]; return `<circle cx="${pos[0]}" cy="${pos[1]}" r="22" ${f(V("pickle"))}/><circle cx="${pos[0]}" cy="${pos[1]}" r="15" ${f("#a8c264")}/>${[0, 120, 240].map(a => `<circle cx="${pos[0] + Math.cos(a * Math.PI / 180) * 7}" cy="${pos[1] + Math.sin(a * Math.PI / 180) * 7}" r="2" ${f("#e9f0c8")}/>`).join("")}`; },
     onion: () => [[80, 86, 30], [122, 112, 26], [96, 126, 20]].map(([x, y, r]) => `<path d="M${x - r} ${y} A${r} ${r} 0 0 1 ${x + r} ${y}" style="fill:none;stroke:${V("onion")};stroke-width:6;stroke-linecap:round"/>`).join(""),
     crispy: () => Array.from({ length: 40 }, (_, k) => {
@@ -252,7 +289,7 @@
     angus:   { title: "АНГУС", body: P("angus"), accent: "#c9a46a", flaps: ["Сезонный", "Классика"], icons: ["Двойная котлета"], sticker: true },
     bigking: { title: "БИГ КИНГ", body: P("bk"), accent: "#ffffff", flaps: ["Звезда", "Классика"], mods: ["Сыр", "Хрустящий лук", "Томаты"], sticker: true },
     whopper: { title: "ТВОЙ ОСОБЕННЫЙ ВОППЕР", body: P("beige"), accent: P("brown"), flaps: ["Новинка", "Белые грибы", "Острый", "Пармезан", "4 сыра", "Гриль"], icons: ["Двойная котлета", "Тройная котлета", "Сыр"] },
-    whopperOld: { title: "ВОППЕР", body: P("orange"), accent: "#fff", flaps: ["Сезонный"] },
+    whopperOld: { title: "ВОППЕР", body: P("orange"), accent: "#fff", flaps: ["Вкус сезона"] },
     pita:    { title: "ПИТА", body: P("orange"), accent: "#fff", flaps: ["Сезонный", "Классика"], side: true },
   };
 
@@ -368,7 +405,7 @@
       body += shell(P("orange"), P("orange"));
       body += `${bkLogo(100, 80, 74)}
         <g transform="translate(18 140) scale(0.82 0.24)">${flames(200, 200, P("flame"), 5)}</g>`;
-      body += flap(100, 148, "Сезонный");
+      body += flap(100, 148, "Вкус сезона");
     } else if (type === "pita") {
       // две створки крышки: одна с надписью «Остро», другая чистая
       const spicy = o.marks.some(m => m.kind === "side" && m.key === "spicy");
