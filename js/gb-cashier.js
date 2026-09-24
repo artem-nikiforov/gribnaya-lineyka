@@ -198,13 +198,14 @@
      Упаковки — рендеры 3D-моделей курса по макетам (blender/render_cashier.py):
      закрытая упаковка на бине и сторона с клапанами, где нужные клапаны продавлены
      так же, как их продавливают на станции. Наклейки «Остро» и модификаторы
-     кладутся поверх. У питы 3D-модель пока в работе — у неё прежний рисунок. */
+     кладутся поверх. У острой питы «Остро» на верхе пакета — тоже наклейкой поверх. */
   const IMG = "assets/trainer/cashier/";
-  const CLOSED = { angus: "angus-closed", bigking: "bigking-closed", whopper: "clamshell-closed" };
-  const FOCUS = { angus: [0.5, 0.78], bigking: [0.42, 0.8], whopper: [0.5, 0.7], pita: [0.5, 0.85] };   // где клапаны на картинке
+  const CLOSED = { angus: "angus-closed", bigking: "bigking-closed", whopper: "clamshell-closed", pita: "pita-closed" };
+  const FOCUS = { angus: [0.5, 0.78], bigking: [0.42, 0.8], whopper: [0.5, 0.7], pita: [0.6, 0.55] };   // где клапаны на картинке
   function marksImg(v) {
     const has = (l) => v.marks.some((m) => m.label === l);
     if (v.pack === "angus") return "angus-sezonnyi";
+    if (v.pack === "pita") return "pita-sezonnyi";
     if (v.pack === "bigking") return has("Классика") ? "bigking-klassika" : "bigking-zvezda";
     if (v.pack === "whopper") {
       const dbl = has("Двойная котлета"), tri = has("Тройная котлета"), ch = has("Сыр");
@@ -214,7 +215,7 @@
   }
   function overlays(v) {
     return v.marks.map((m) => {
-      if (m.kind === "sticker") return `<span class="gb-sticker gb-sticker--hot">ОСТРО</span>`;
+      if (m.kind === "sticker" || (m.kind === "side" && m.key === "spicy")) return `<span class="gb-sticker gb-sticker--hot">ОСТРО</span>`;
       if (m.kind === "mod") return `<span class="gb-sticker gb-sticker--mod">${m.key === "minus" ? "БЕЗ" : "+"} ${m.label.toUpperCase()}</span>`;
       if (m.kind === "icon" && v.pack === "angus") return `<span class="gb-sticker gb-sticker--mark">ДВОЙНАЯ КОТЛЕТА</span>`;
       return "";
@@ -225,7 +226,7 @@
     const file = it.view === "front" ? CLOSED[v.pack] : marksImg(v);
     if (!file) return ART().pack(v.pack, { view: it.view, marks: v.marks, zoom });
     const alt = `${PACK_NAME[v.pack]}${it.view === "front" ? ", закрыта" : ": " + describe(v)}`;
-    return `<span class="gb-pkimg"><img src="${IMG + file}.webp" alt="${alt}" draggable="false">${it.view === "front" ? overlays({ ...v, marks: v.marks.filter((m) => m.kind === "sticker") }) : overlays(v)}</span>`;
+    return `<span class="gb-pkimg"><img src="${IMG + file}.webp" alt="${alt}" draggable="false">${it.view === "front" ? overlays({ ...v, marks: v.marks.filter((m) => m.kind === "sticker" || m.kind === "side") }) : overlays(v)}</span>`;
   };
 
   function drawBin(st) {
