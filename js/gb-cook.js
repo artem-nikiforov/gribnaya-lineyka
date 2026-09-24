@@ -847,7 +847,10 @@
             ${label}<span class="gb-mark__ok">отмечено</span></button>`).join("")}
         </div></div>`);
       const draw = () => {
-        ctx.host.querySelector("#gb-mp").innerHTML = ART().pack(step.pack, { view: "marks", zoom: true, marks: marked.map(markObj) });
+        // пита — рендер 3D-модели: ребро с клапанами до и после продавливания «Сезонный»
+        ctx.host.querySelector("#gb-mp").innerHTML = step.pack === "pita"
+          ? `<span class="gb-pkimg"><img src="assets/trainer/${marked.includes("Сезонный") ? "cashier/pita-sezonnyi" : "cook/pita-edge"}.webp" alt="Торец упаковки питы с клапанами" draggable="false"></span>`
+          : ART().pack(step.pack, { view: "marks", zoom: true, marks: marked.map(markObj) });
       };
       draw();
       ctx.host.querySelector("#gb-mk").addEventListener("click", async (e) => {
@@ -907,8 +910,8 @@
     /* 11. Пита: какой стороной закрыть */
     pitaSide(ctx) {
       ctx.host.innerHTML = scene(`<div class="gb-choice-grid cols-2" id="gb-side">
-        <button class="gb-pick" data-side="plain"><span class="gb-slot" style="--ratio:1">${ART().pack("pita", { view: "marks", zoom: true, marks: [] })}</span>Сторона без надписи</button>
-        <button class="gb-pick" data-side="spicy"><span class="gb-slot" style="--ratio:1">${ART().pack("pita", { view: "marks", zoom: true, marks: [{ kind: "side", key: "spicy" }] })}</span>Сторона «Остро»</button>
+        <button class="gb-pick" data-side="plain"><span class="gb-slot bare" style="--ratio:2;--fit:contain"><img src="assets/trainer/cook/pita-top-plain.webp" alt="Пита закрыта линзой без надписи" draggable="false"></span>Сторона без надписи</button>
+        <button class="gb-pick" data-side="spicy"><span class="gb-slot bare" style="--ratio:2;--fit:contain"><img src="assets/trainer/cook/pita-top-spicy.webp" alt="Пита закрыта линзой «Остро!»" draggable="false"></span>Сторона «Остро»</button>
       </div>`);
       ctx.host.querySelector("#gb-side").addEventListener("click", async (e) => {
         const b = e.target.closest("[data-side]"); if (!b) return;
