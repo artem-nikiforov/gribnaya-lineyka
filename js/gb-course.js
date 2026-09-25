@@ -261,15 +261,19 @@
       const py = ev ? (ev.clientY - r.top) / r.height : 0.5;
       stage.scrollTo(px * (stage.scrollWidth - r.width), py * (stage.scrollHeight - r.height));
     };
-    bigImg.addEventListener("click", (e) => { e.stopPropagation(); setZoom(!bigImg.classList.contains("is-zoom"), e); });
+    bigImg.addEventListener("click", (e) => { e.stopPropagation(); if (!box.classList.contains("is-label")) setZoom(!bigImg.classList.contains("is-zoom"), e); });
     const closeBox = () => { box.hidden = true; document.body.style.overflow = ""; setZoom(false); };
     box.addEventListener("click", (e) => { if (e.target === box || e.target.closest(".gb-lightbox__close")) closeBox(); });
     document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeBox(); });
     $$(".gb-photo img, .gb-shelf__card img").forEach(img => {
       img.tabIndex = 0; img.setAttribute("role", "button");
       const open = () => {
-        bigImg.src = img.src; bigImg.alt = img.alt;
+        // есть вырезка этикетки — показываем её крупно вместо всего фото
+        const label = img.dataset.label;
+        bigImg.src = label || img.src; bigImg.alt = label ? "Маркировка крупно: " + img.alt : img.alt;
+        box.classList.toggle("is-label", !!label);
         setZoom(false);
+        if (label) hint.textContent = "Маркировка крупно";
         box.hidden = false; document.body.style.overflow = "hidden";
       };
       img.addEventListener("click", open);

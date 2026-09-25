@@ -149,6 +149,7 @@ body { background: var(--ku-bg); overflow-x: hidden; }
 .gb-lightbox__stage { max-width: 96vw; max-height: 92vh; overflow: auto; border-radius: var(--ku-radius-l); box-shadow: var(--ku-shadow-l); overscroll-behavior: contain; }
 .gb-lightbox img { display: block; max-width: min(96vw, 60rem); max-height: 92vh; cursor: zoom-in; }
 .gb-lightbox img.is-zoom { max-width: none; max-height: none; height: auto; cursor: zoom-out; }
+.gb-lightbox.is-label img { width: min(92vw, 44rem); max-height: 84vh; object-fit: contain; cursor: default; background: #fff; }
 .gb-lightbox__hint {
   position: absolute; bottom: var(--ku-space-m); left: 50%; transform: translateX(-50%);
   padding: 0.35em 0.9em; border-radius: var(--ku-radius-pill);
