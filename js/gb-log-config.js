@@ -6,8 +6,8 @@
    token    — тот же токен, что в скрипте таблицы (TOKEN). Отсекает случайный мусор.
    ════════════════════════════════════════════════════════════════════════ */
 window.GB_LOG_CONFIG = {
-  endpoint: "",
-  token: "",
+  endpoint: "https://script.google.com/macros/s/AKfycbz1ZI1IZxBD-C3lyGZO1YKHFD32CuY_xwNuOihxjXUg0vzxKfTUhf2VdJ4izaf5n9Q/exec",
+  token: "RANDOM-MUSHROOM-TOKEN",
   course: "belye-griby-2026",       // версия курса в каждой строке таблицы
   learner: "hash",                  // "hash" — id ученика из LMS в виде хэша, "raw" — как есть, "none" — не слать
   clicks: true,                     // общий лог кликов по кнопкам и ссылкам (помимо событий тренажёров и тестов)
