@@ -885,8 +885,8 @@
       let top = 150;
       ctx.host.innerHTML = scene(`
         <div class="gb-drag-area" id="gb-area">
-          <div style="position:absolute;left:8%;right:8%;top:4%;height:38%;border-radius:12px;border:3px dashed var(--ku-brand);background:color-mix(in srgb,var(--gb-pack-orange) 30%,transparent);display:grid;place-items:center">
-            <span class="ku-badge">Упаковка</span>
+          <div style="position:absolute;left:8%;right:8%;top:4%;height:38%;border-radius:12px;border:3px dashed var(--ku-brand);display:grid;place-items:center">
+            <img src="assets/trainer/cook/pita-front.webp" alt="Упаковка для питы" draggable="false" style="max-width:100%;max-height:100%;object-fit:contain;pointer-events:none">
           </div>
           <div class="gb-draggable" id="gb-pitadrag" tabindex="0" role="slider" aria-label="Пита: перетащи в упаковку" style="width:62%">
             ${ART().svg("0 0 200 110", `<path d="M10 100 A90 90 0 0 1 190 100 Z" style="fill:var(--gb-ill-tortilla)"/><path d="M30 100 A70 70 0 0 1 170 100" style="fill:none;stroke:#b8854a;stroke-width:2;stroke-dasharray:5 6;opacity:.6"/>`)}
