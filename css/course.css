@@ -1337,14 +1337,14 @@ button.gb-half__disc:hover { transform: scale(1.04) rotate(-3deg); }
 .gb-clip.is-paused .gb-clip__toggle:hover { transform: translate(50%, 50%) scale(1.08); }
 
 /* Какую упаковку брать: два правила рядом — Воппер и ролл, с картинками упаковок */
-.gb-switch__row { display: flex; align-items: center; gap: 0.6rem; }
+.gb-switch__row { display: flex; align-items: flex-start; gap: 0.6rem; }
 .gb-switch__item { flex: 1 1 0; display: flex; flex-direction: column; align-items: center; gap: 0.5rem; min-width: 0; }
-.gb-switch__item .gb-slot { width: 100%; --ratio: 4 / 3; }
+.gb-switch__name { font-weight: 700; font-size: .95rem; color: var(--ku-text); text-align: center; }
 .gb-switch__item .gb-flap { width: 100%; text-align: center; }
-.gb-switch__arrow { flex: none; color: var(--ku-brand); opacity: 0.75; }
+.gb-switch__arrow { flex: none; color: var(--ku-brand); opacity: 0.75; margin-top: 2.6rem; }
 @media (max-width: 560px) {
   .gb-switch__row { flex-direction: column; align-items: stretch; }
-  .gb-switch__arrow { transform: rotate(90deg); align-self: center; }
+  .gb-switch__arrow { transform: rotate(90deg); align-self: center; margin-top: 0; }
 }
 
 /* Булочки и сборка идут на уже расстеленной бумаге */
@@ -1366,10 +1366,6 @@ button.gb-half__disc:hover { transform: scale(1.04) rotate(-3deg); }
 .gb-chapter-card__img.is-cover { object-fit: cover; }
 .gb-chapter-card:hover .gb-chapter-card__img { transform: scale(1.05); }
 
-/* Текущая упаковка Воппера/ролла: пока нет реального фото — нейтральная плашка */
-.gb-switch__now { width: 100%; aspect-ratio: 4 / 3; display: grid; place-content: center; justify-items: center; gap: .4em;
-  border-radius: var(--ku-radius-l); background: var(--ku-surface); color: var(--ku-text-soft); font-size: .85rem; font-weight: 600; text-align: center; }
-.gb-switch__now .ku-ico { color: var(--ku-brand); opacity: .7; }
 
 /* Правая колонка 3D-блока без экскурсии: правила маркировки и задание */
 .gb-3d__side { display: grid; gap: var(--ku-space-s); align-content: start; }

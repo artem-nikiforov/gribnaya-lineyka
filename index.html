@@ -93,8 +93,6 @@
       <span class="ku-bk-logo" role="img" aria-label="Burger King"></span>
 
       <!-- Параллакс-слои: --d — скорость по скроллу, --dx/--dy — по курсору -->
-      <div class="gb-layer" style="right:-4%;bottom:-6%;width:clamp(12rem,34vw,26rem);--d:-0.18;--dx:-18;--dy:-10"><div class="gb-float slow" data-deco="porcini"></div></div>
-      <div class="gb-layer" style="right:27%;bottom:6%;width:clamp(5rem,11vw,9rem);--d:-0.32;--dx:-30;--dy:-16"><div class="gb-float rev" data-deco="porcini|var(--ku__rust-500)"></div></div>
       <div class="gb-layer" style="right:8%;top:14%;width:clamp(4rem,8vw,7rem);--d:0.22;--dx:24;--dy:14;transform-origin:center"><div class="gb-float" data-deco="leaf" style="rotate:-28deg"></div></div>
       <div class="gb-layer" style="left:44%;top:8%;width:clamp(3rem,5vw,4.5rem);--d:0.35;--dx:32;--dy:20"><div class="gb-float rev" data-deco="oak|var(--ku__rust-400)" style="rotate:34deg"></div></div>
       <div class="gb-layer" style="left:-2%;bottom:4%;width:clamp(3.5rem,7vw,6rem);--d:0.12;--dx:14;--dy:10"><div class="gb-float slow" data-deco="leaf|var(--ku__cap-400)" style="rotate:150deg"></div></div>
@@ -116,7 +114,7 @@
               </div>
             </div>
           </div>
-          <div class="gb-slot bare" data-asset="hero" style="width:min(30vw,24rem);flex-shrink:0;background:transparent" data-hero-slot></div>
+          <div class="gb-slot bare" data-asset="hero" style="width:min(38vw,30rem);flex-shrink:0;background:transparent" data-hero-slot></div>
         </div>
       </div>
       <a class="gb-hero__scroll" href="#gb-contents" onclick="document.getElementById('gb-contents').scrollIntoView({behavior:'smooth'});return false">
@@ -892,12 +890,12 @@
             <p class="ku-small ku-soft" style="margin:0 0 .8em">Пока текущая упаковка не закончилась, упаковывай в неё. Закончилась — переходишь на новую.</p>
             <div class="gb-switch__row">
               <div class="gb-switch__item">
-                <div class="gb-switch__now"><svg class="ku-ico l"><use href="#i-package"/></svg><span>Текущая упаковка</span></div>
+                <span class="gb-switch__name">Текущая упаковка</span>
                 <span class="gb-flap is-key" style="--c:#2f7d4a">Клапан «Вкус сезона»</span>
               </div>
               <svg class="ku-ico gb-switch__arrow"><use href="#i-right"/></svg>
               <div class="gb-switch__item">
-                <div class="gb-slot" data-asset="pack-new-clamshell"></div>
+                <span class="gb-switch__name">Новая упаковка</span>
                 <span class="gb-flap is-key" style="--c:var(--gb-pack-blue)">Клапан «Белые грибы»</span>
               </div>
             </div>
@@ -908,12 +906,12 @@
             <p class="ku-small ku-soft" style="margin:0 0 .8em">Пока новой упаковки в ресторане нет, упаковывай в текущую. Как только новая приехала — берёшь только её.</p>
             <div class="gb-switch__row">
               <div class="gb-switch__item">
-                <div class="gb-switch__now"><svg class="ku-ico l"><use href="#i-package"/></svg><span>Текущая упаковка</span></div>
+                <span class="gb-switch__name">Текущая упаковка</span>
                 <span class="gb-flap is-key" style="--c:#2f7d4a">Клапан «Вкус сезона»</span>
               </div>
               <svg class="ku-ico gb-switch__arrow"><use href="#i-right"/></svg>
               <div class="gb-switch__item">
-                <div class="gb-slot" data-asset="pack-new-roll"></div>
+                <span class="gb-switch__name">Новая упаковка</span>
                 <span class="gb-flap is-key" style="--c:var(--gb-pack-blue)">Клапан «Белые грибы»</span>
               </div>
             </div>
