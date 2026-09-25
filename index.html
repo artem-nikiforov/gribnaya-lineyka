@@ -768,12 +768,12 @@
               </div>
             </div>
             <div class="ku-space m"></div>
-            <!-- Шпаргалка по сценарию тренажёра «Повар» (Сценарий тренажера в курсе Белые грибы.xlsx). Ролик — ждём. -->
+            <!-- Шпаргалка по сценарию тренажёра «Повар» (Сценарий тренажера в курсе Белые грибы.xlsx). Ниже — видео сборки классического Воппера (bktube) по кнопке. -->
             <div class="ku-card gb-recipe" style="max-width:34rem">
               <span class="ku-exercise__label"><svg class="ku-ico s"><use href="#i-layers"/></svg> Шпаргалка</span>
               <div class="gb-recipe__part">
                 <span class="gb-recipe__title">Верхняя часть булочки</span>
-                <ol><li>Майонез <b>3 нажатия</b></li><li>Салат Айсберг</li><li>Томаты <b>2 ломтика</b></li></ol>
+                <ol><li>Майонез <b>3 нажатия</b></li><li>Салат Айсберг <b>14 г · 4 пальца</b></li><li>Томаты <b>2 ломтика</b></li></ol>
               </div>
               <div class="gb-recipe__part">
                 <span class="gb-recipe__title">Нижняя часть булочки <i>— слои сверху вниз</i></span>
@@ -782,6 +782,14 @@
               <div class="gb-recipe__part">
                 <span class="gb-recipe__title">Упаковка</span>
                 <div class="gb-flaps"><span class="gb-flap" style="--c:var(--gb-pack-orange)">«Твой особенный Воппер»</span><span class="gb-flap is-key" style="--c:var(--gb-pack-blue)">Клапан «Белые грибы»</span></div>
+              </div>
+            </div>
+            <div class="ku-space m"></div>
+            <div class="ku-callout gb-video-call" style="max-width:34rem">
+              <span class="ku-callout__icon"><svg class="ku-ico l"><use href="#i-play"/></svg></span>
+              <div>
+                <p style="margin:0 0 .8em">Если забыл рецепт классического Воппера, можешь посмотреть видео сборки.</p>
+                <button class="ku-btn primary" data-video-open="gb-whopper-video"><svg class="ku-ico"><use href="#i-play"/></svg> Смотреть видео сборки</button>
               </div>
             </div>
           </div>
@@ -977,7 +985,7 @@
         <div class="ku-space s"></div>
         <h2 class="ku-h1">Тренажёр</h2>
         <div class="ku-space s"></div>
-        <p class="ku-lead" id="gb-trainer-lead">Выбери, кем работаешь в ресторане. От роли зависит, какой тренажёр ты пройдёшь.</p>
+        <p class="ku-lead" id="gb-trainer-lead">Тренажёр — под позицию, которую ты выбрал в начале курса.</p>
       </div>
     </header>
 
@@ -1007,7 +1015,7 @@
           <div class="ku-space s"></div>
           <div class="gb-track" id="gb-tracks-list"></div>
           <div class="ku-space s"></div>
-          <p class="ku-caption" id="gb-role-note">Роль можно сменить — просто выбери другую карточку выше. Результаты сохраняются.</p>
+          <p class="ku-caption" id="gb-role-note" hidden></p>
         </div>
 
         <div class="ku-space l"></div>
@@ -1074,6 +1082,15 @@
         <button class="ku-btn ghost" id="gb-fb-secondary" hidden></button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ═══ ВИДЕО СБОРКИ ВОППЕРА (bktube) — плеер вставляется при открытии и убирается при закрытии ═══ -->
+<div class="ku-modal-overlay" id="gb-whopper-video" data-embed-src="https://bktube.burgerkingrus.ru/videos/embed/v5RbyfKJY6zikeKmHcsTR9?title=0&amp;warningTitle=0&amp;peertubeLink=0&amp;p2p=0" data-embed-title="whopper 22.05">
+  <div class="ku-modal wide" role="dialog" aria-modal="true" aria-labelledby="gb-whopper-video-title" style="width:min(92vw,60rem);max-width:none">
+    <button class="ku-modal__close" data-ku-modal-close aria-label="Закрыть"><svg class="ku-ico"><use href="#i-x"/></svg></button>
+    <h3 class="ku-h4" id="gb-whopper-video-title" style="margin:0 0 .8em">Сборка классического Воппера</h3>
+    <div class="gb-video-frame" style="position:relative;padding-top:56.25%;border-radius:var(--ku-radius-m);overflow:hidden;background:#000"></div>
   </div>
 </div>
 

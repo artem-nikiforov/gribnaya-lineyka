@@ -1391,3 +1391,8 @@ button.gb-half__disc:hover { transform: scale(1.04) rotate(-3deg); }
 .gb-sticker--mark { bottom: 8%; right: 6%; rotate: 5deg; background: #fff; color: #502314; border: 2px dashed #502314; font-size: clamp(.55rem, 4cqi, 1.05rem); }
 .gb-hands__view.is-zoom { overflow: auto; place-items: start; }
 .gb-hands__view.is-zoom .gb-hands__pkg { width: 230%; max-width: none; margin: 0; }
+
+/* Выбор должности сделан — карточки закрыты, выбранная остаётся подсвеченной */
+.gb-role:disabled, .gb-role:disabled:hover { cursor: default; transform: none; }
+.gb-role:disabled.is-active { opacity: 1; }
+.gb-role.is-dim { opacity: .4; filter: grayscale(.4); }

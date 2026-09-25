@@ -44,14 +44,20 @@
     if (roleBox) roleBox.hidden = pos !== "crew";
     const ready = pos === "aup" || (pos === "crew" && role);
     if (contents) contents.hidden = !ready;
+    // курс линейный: выбор делается один раз — после него карточки закрыты
+    $$("[data-pos], #gb-who-role [data-role]").forEach(b => {
+      const chosen = b.dataset.pos ? b.dataset.pos === pos : b.dataset.role === role;
+      b.disabled = !!ready; b.classList.toggle("is-dim", !!ready && !chosen);
+    });
     const note = $("#gb-who-note");
-    if (note) note.textContent = !pos ? "Выбери должность — ниже появится список глав."
-      : pos === "crew" && !role ? "Выбери позицию — ниже появится список глав."
-      : "Список глав ниже. Должность можно сменить в любой момент.";
+    if (note) note.textContent = !pos ? "Выбери должность — после этого откроются главы курса."
+      : pos === "crew" && !role ? "Выбери позицию — после этого откроются главы курса."
+      : `Выбрано: ${pos === "aup" ? "АУП" : "член бригады, " + ROLE_NAME[role].toLowerCase()}. Главы курса — ниже.`;
+    const toWho = () => $("#gb-who").scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
     const start = $("#gb-start");
-    if (start) start.onclick = ready
-      ? () => kuNavigate(chaptersFor(pos)[0])
-      : () => $("#gb-who").scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
+    if (start) start.onclick = ready ? () => kuNavigate(chaptersFor(pos)[0]) : toWho;
+    const scroll = $(".gb-hero__scroll");
+    if (scroll) scroll.onclick = (e) => { e.preventDefault(); ready ? $("#gb-contents").scrollIntoView({ behavior: reduce ? "auto" : "smooth" }) : toWho(); };
     if (!ready) return;
     const ids = chaptersFor(pos);
     if (window.kuSetChapters) window.kuSetChapters(ids);
@@ -73,7 +79,7 @@
     const lead = $("#gb-trainer-lead");
     if (lead) lead.textContent = pos === "aup"
       ? "Короткий тренажёр повара: собери и упакуй Ангус Белые грибы два раза без ошибок."
-      : "Твой тренажёр зависит от позиции, которую ты выбрал на обложке.";
+      : "Тренажёр — под позицию, которую ты выбрал в начале курса.";
     // переходы между главами зависят от состава
     const ingrNext = $("#gb-ingr-next"), cookNext = $("#gb-cooking-next");
     if (cookNext) cookNext.innerHTML = pos === "aup"
@@ -88,19 +94,38 @@
     markCards();
   }
   function initWho() {
+    const locked = () => position() === "aup" || (position() === "crew" && !!crewRole());
     $$("[data-pos]").forEach(b => b.addEventListener("click", () => {
+      if (locked()) return;
       KUv.set("position-key", b.dataset.pos);
       applyPosition();
       const t = b.dataset.pos === "crew" ? $("#gb-who-role") : $("#gb-contents");
       if (t) t.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
     }));
     $$("#gb-who-role [data-role]").forEach(b => b.addEventListener("click", () => {
+      if (locked()) return;
       KUv.set("role-key", b.dataset.role);
       applyPosition();
       const c = $("#gb-contents"); if (c) c.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
     }));
     document.addEventListener("ku:ready", applyPosition);
     applyPosition();
+  }
+
+  /* ══ ВИДЕО ПО КНОПКЕ ════════════════════════════════════════════════
+     Плеер bktube создаётся при открытии модалки и удаляется при закрытии:
+     не грузится заранее и не играет в фоне. */
+  function initVideo() {
+    document.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-video-open]"); if (!b) return;
+      const m = document.getElementById(b.dataset.videoOpen); if (!m) return;
+      const box = m.querySelector(".gb-video-frame");
+      box.innerHTML = `<iframe title="${m.dataset.embedTitle}" width="100%" height="100%" src="${m.dataset.embedSrc}" frameborder="0" allowfullscreen sandbox="allow-same-origin allow-scripts allow-popups allow-forms" style="position:absolute;inset:0"></iframe>`;
+      window.kuOpenModal(m.id);
+      new MutationObserver((_, obs) => {
+        if (!m.classList.contains("open")) { box.innerHTML = ""; obs.disconnect(); }
+      }).observe(m, { attributes: true, attributeFilter: ["class"] });
+    });
   }
 
   /* ══ 1. ПАРАЛЛАКС ═══════════════════════════════════════════════════ */
@@ -474,11 +499,12 @@
     const root = $("#gb-trainer"); if (!root) return;
     const aup = position() === "aup";
     const box = $("#gb-roles");
-    if (box) box.hidden = aup;                       // у АУП тренажёр один — «Повар»
+    if (box) box.hidden = true;                      // роль выбрана в начале курса — здесь её не меняют
     const note = $("#gb-role-note");
     if (note) note.textContent = aup
       ? "У АУП один тренажёр: собери Ангус Белые грибы два раза без ошибок."
-      : "Роль можно сменить на обложке курса. Результаты сохраняются.";
+      : "";
+    if (note) note.hidden = !aup;
   }
   function initTrainer() {
     const root = $("#gb-trainer"); if (!root) return;
@@ -589,6 +615,7 @@
   document.addEventListener("DOMContentLoaded", () => {
     hookNavigate();
     initWho();
+    initVideo();
     initDecor();
     initDishes();
     initIngredients();
