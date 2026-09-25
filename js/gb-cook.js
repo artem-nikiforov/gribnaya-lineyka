@@ -12,6 +12,7 @@
    ════════════════════════════════════════════════════════════════════════ */
 (function () {
   "use strict";
+  const log = (t, d) => { try { if (window.GBLog) window.GBLog.track(t, d); } catch (_) {} };   // аналитика: js/gb-log.js
 
   const S = () => window.GBShell;
   const ART = () => window.GBArt;
@@ -418,10 +419,11 @@
         <div id="gb-step"></div>
       </div>`;
     const host = document.getElementById("gb-step");
+    const t0 = Date.now(), stepName = d.id + "#" + (si + 1);
     const ctx = {
       host, step, dish: run.dish, d,
-      ok: () => nextStep(),
-      fail: (text) => fail(step, text),
+      ok: () => { log("cook_step", { n: stepName, v: step.type, c: true, ms: Date.now() - t0 }); nextStep(); },
+      fail: (text) => { log("cook_step", { n: stepName, v: step.type, c: false, ms: Date.now() - t0, err: String(text || "").slice(0, 200) }); return fail(step, text); },
     };
     STEP_RENDERERS[step.type](ctx);
     window.GBAssets.hydrateAll(host);
@@ -444,6 +446,7 @@
     const time = run.dishClock.sec();
     const late = time > d.limit;
     const point = errors.length === 0 && !late;
+    log("cook_dish", { n: d.id, c: point, ms: Math.round(time * 1000), errors: errors.length, late, limit: d.limit });
     if (point) run.score++;
     run.results.push({ name: d.name, time, limit: d.limit, errors: errors.slice(), point, late });
     run.dishClock.dispose();

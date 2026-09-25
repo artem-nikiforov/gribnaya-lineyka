@@ -14,6 +14,7 @@
    ════════════════════════════════════════════════════════════════════════ */
 (function () {
   "use strict";
+  const log = (t, d) => { try { if (window.GBLog) window.GBLog.track(t, d); } catch (_) {} };   // аналитика: js/gb-log.js
 
   const S = () => window.GBShell;
   const ART = () => window.GBArt;
@@ -262,6 +263,7 @@
         : `${icon("i-rotate")} ${pita ? "Верх пакета" : "Лицевая сторона"}`;
     };
     const take = (i) => {
+      log("cashier_open", { n: st.o.order, v: st.items[i].v.name, pos: i + 1, training: !!st.training });
       st.hand = i; st.checked = true; st.items[i].seen = true;
       st.items[i].view = "marks";                       // сразу показываем сторону с клапанами
       hands.hidden = false; drawHand(false);
@@ -298,6 +300,7 @@
       const it = st.items[st.hand];
       const correct = it.key === st.o.correct;
       const checked = st.checked;
+      log("cashier_give", { n: st.o.order, v: it.v.name, c: correct, checked, training: !!st.training });
 
       if (st.training) {
         if (!checked) {
@@ -338,6 +341,7 @@
     }
     const max = ORDERS.length * 3;
     const res = { score: run.score, max, passed: run.score >= PASS, totalSec: run.clock ? run.clock.sec() : 0, results: run.results };
+    log("cashier_run", { v: res.score + "/" + max, c: res.passed, ms: Math.round(res.totalSec * 1000), skipped: run.results.filter((r) => r.skipped).length });
     if (run.cb.onDone) run.cb.onDone(res);
     renderResults(res);
   }

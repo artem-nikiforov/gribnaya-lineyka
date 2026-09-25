@@ -334,6 +334,8 @@
       if (result) lmsSet("cmi.interactions." + i + ".result", result);
       lmsCommit();
     },
+    // id ученика в LMS (cmi.core.student_id) — для сборщика аналитики js/gb-log.js
+    learnerId() { return lmsGet("cmi.core.student_id"); },
   };
 
   /* ══ 8. ИНИЦИАЛИЗАЦИЯ ═══════════════════════════════════════════════ */

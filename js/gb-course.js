@@ -11,6 +11,7 @@
    ════════════════════════════════════════════════════════════════════════ */
 (function () {
   "use strict";
+  const log = (t, d) => { try { if (window.GBLog) window.GBLog.track(t, d); } catch (_) {} };   // аналитика: js/gb-log.js
 
   const $ = (s, r) => (r || document).querySelector(s);
   const $$ = (s, r) => [...(r || document).querySelectorAll(s)];
@@ -97,6 +98,7 @@
     const locked = () => position() === "aup" || (position() === "crew" && !!crewRole());
     $$("[data-pos]").forEach(b => b.addEventListener("click", () => {
       if (locked()) return;
+      log("who", { n: "position", v: b.dataset.pos });
       KUv.set("position-key", b.dataset.pos);
       applyPosition();
       const t = b.dataset.pos === "crew" ? $("#gb-who-role") : $("#gb-contents");
@@ -104,6 +106,7 @@
     }));
     $$("#gb-who-role [data-role]").forEach(b => b.addEventListener("click", () => {
       if (locked()) return;
+      log("who", { n: "role", v: b.dataset.role });
       KUv.set("role-key", b.dataset.role);
       applyPosition();
       const c = $("#gb-contents"); if (c) c.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
@@ -122,8 +125,10 @@
       const box = m.querySelector(".gb-video-frame");
       box.innerHTML = `<iframe title="${m.dataset.embedTitle}" width="100%" height="100%" src="${m.dataset.embedSrc}" frameborder="0" allowfullscreen sandbox="allow-same-origin allow-scripts allow-popups allow-forms" style="position:absolute;inset:0"></iframe>`;
       window.kuOpenModal(m.id);
+      const t0 = Date.now();
+      log("video_open", { n: m.id });
       new MutationObserver((_, obs) => {
-        if (!m.classList.contains("open")) { box.innerHTML = ""; obs.disconnect(); }
+        if (!m.classList.contains("open")) { box.innerHTML = ""; obs.disconnect(); log("video_close", { n: m.id, ms: Date.now() - t0 }); }
       }).observe(m, { attributes: true, attributeFilter: ["class"] });
     });
   }
@@ -440,6 +445,7 @@
       const b = e.target.closest("[data-o]");
       if (b && !b.disabled) {
         const o = PQ[qi].options[+b.dataset.o];
+        log("pack_quiz", { n: "pack-q" + (qi + 1), v: o.label + ": " + o.sub, c: !!o.ok });
         const fb = root.querySelector("#fb-pq");
         fb.className = "ku-feedback show " + (o.ok ? "correct" : "incorrect");
         fb.innerHTML = `<span>${o.fb}</span>`;
@@ -532,8 +538,10 @@
   }
   function launch(t) {
     const tr = TRACK[t];
+    log("trainer_start", { n: t });
     tr.engine().start({
       onDone: (res) => {
+        log("trainer_result", { n: t, v: res.score + "/" + res.max, c: !!res.passed });
         const prev = +(KUv.get(bestKey(t)) || -1);
         if (res.score > prev) {
           KUv.set(bestKey(t), String(res.score));

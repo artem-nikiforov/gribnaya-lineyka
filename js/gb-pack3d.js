@@ -19,6 +19,7 @@
    ════════════════════════════════════════════════════════════════════════ */
 (function () {
   "use strict";
+  const log = (t, d) => { try { if (window.GBLog) window.GBLog.track(t, d); } catch (_) {} };   // аналитика: js/gb-log.js
 
   const THREE_SRC = "js/vendor/gb-three.min.js";
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -327,6 +328,7 @@
         });
       }
       function toggleFlap(k, on, fromTap) {
+        log("flap", { n: (root.dataset.model || "clamshell") + ":" + k, v: on ? "press" : "release", c: mission && on ? k === mission : undefined, mission: mission || undefined });
         setPressed(k, on);
         if (mission && on) {
           if (k === mission) {
