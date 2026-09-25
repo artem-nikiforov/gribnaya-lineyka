@@ -77,20 +77,23 @@ function setup() {
   buildSummary();
 }
 
-/** Сводки на отдельном листе (формулы QUERY по листу events; formula — в английской нотации). Можно перезапускать. */
+/** Сводки на отдельном листе (формулы QUERY по листу events). Можно перезапускать — старые сводки стираются. */
 function buildSummary() {
   const ss = SpreadsheetApp.getActiveSpreadsheet();
   const sh = ss.getSheetByName("summary") || ss.insertSheet("summary");
   sh.clear();
   const src = SHEET_PREFIX + "!A:Q";
+  // разделитель аргументов зависит от локали таблицы: в ru_RU, de_DE и т. п. запятая — десятичная, аргументы — через «;»
+  const loc = String(ss.getSpreadsheetLocale() || "");
+  const sep = /^(en|ja|zh|ko|th|he|iw|hi|ms|fil|tl)(_|$)/i.test(loc) ? "," : ";";
   const blocks = [
-    ["События по типам", `=QUERY(${src},"select K, count(C) where K is not null group by K order by count(C) desc label count(C) 'событий'",1)`],
-    ["Тесты: доля верных ответов по вопросам", `=QUERY(${src},"select L, count(N), avg(N) where K = 'quiz' or K = 'pack_quiz' group by L order by avg(N) label count(N) 'ответов', avg(N) 'доля верных'",1)`],
-    ["Повар: шаги с ошибками", `=QUERY(${src},"select L, M, count(N), avg(N), avg(O) where K = 'cook_step' group by L, M order by avg(N) label count(N) 'попыток', avg(N) 'доля верных', avg(O) 'среднее время, мс'",1)`],
-    ["Повар: блюда", `=QUERY(${src},"select L, count(N), avg(N), avg(O) where K = 'cook_dish' group by L label count(N) 'собрано', avg(N) 'доля без ошибок и в срок', avg(O) 'среднее время, мс'",1)`],
-    ["Кассир: заказы", `=QUERY(${src},"select L, count(N), avg(N) where K = 'cashier_give' group by L order by avg(N) label count(N) 'выдач', avg(N) 'доля верных'",1)`],
-    ["Итоги тренажёров", `=QUERY(${src},"select L, count(N), avg(N) where K = 'trainer_result' or K = 'cashier_run' group by L label count(N) 'попыток', avg(N) 'доля сдавших'",1)`],
-    ["Ошибки скриптов", `=QUERY(${src},"select L, M, count(C) where K = 'js_error' group by L, M order by count(C) desc label count(C) 'раз'",1)`],
+    ["События по типам", `=QUERY(${src}${sep}"select K, count(C) where K is not null group by K order by count(C) desc label count(C) 'событий'"${sep}1)`],
+    ["Тесты: доля верных ответов по вопросам", `=QUERY(${src}${sep}"select L, count(N), avg(N) where K = 'quiz' or K = 'pack_quiz' group by L order by avg(N) label count(N) 'ответов', avg(N) 'доля верных'"${sep}1)`],
+    ["Повар: шаги с ошибками", `=QUERY(${src}${sep}"select L, M, count(N), avg(N), avg(O) where K = 'cook_step' group by L, M order by avg(N) label count(N) 'попыток', avg(N) 'доля верных', avg(O) 'среднее время, мс'"${sep}1)`],
+    ["Повар: блюда", `=QUERY(${src}${sep}"select L, count(N), avg(N), avg(O) where K = 'cook_dish' group by L label count(N) 'собрано', avg(N) 'доля без ошибок и в срок', avg(O) 'среднее время, мс'"${sep}1)`],
+    ["Кассир: заказы", `=QUERY(${src}${sep}"select L, count(N), avg(N) where K = 'cashier_give' group by L order by avg(N) label count(N) 'выдач', avg(N) 'доля верных'"${sep}1)`],
+    ["Итоги тренажёров", `=QUERY(${src}${sep}"select L, count(N), avg(N) where K = 'trainer_result' or K = 'cashier_run' group by L label count(N) 'попыток', avg(N) 'доля сдавших'"${sep}1)`],
+    ["Ошибки скриптов", `=QUERY(${src}${sep}"select L, M, count(C) where K = 'js_error' group by L, M order by count(C) desc label count(C) 'раз'"${sep}1)`],
   ];
   let col = 1;
   blocks.forEach(([title, f]) => {
