@@ -69,6 +69,7 @@
     const paused = [];
     if (o.pause) clocks.forEach(c => { if (c.running) { c.pause(); paused.push(c); } });
     fb.classList.toggle("is-good", o.tone === "good");
+    fb.classList.toggle("is-info", o.tone === "info");
     $("#gb-fb-icon").innerHTML = `<svg class="ku-ico"><use href="#${o.tone === "good" ? "i-check" : o.tone === "info" ? "i-info" : "i-alert"}"/></svg>`;
     $("#gb-fb-title").textContent = o.title;
     $("#gb-fb-text").innerHTML = o.text;

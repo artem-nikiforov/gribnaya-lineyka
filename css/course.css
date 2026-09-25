@@ -675,7 +675,7 @@ body.gb-app-open { overflow: hidden; }
 }
 .gb-paper-stage.is-turned .gb-paper__turn { opacity: .18; animation: none; }
 
-.gb-wrap-outer { width: min(100%, 21rem, 42vh); margin-inline: auto; padding-top: 16%; overflow: hidden; }
+.gb-wrap-outer { width: min(100%, 34rem, 60vh); margin-inline: auto; padding-top: 16%; overflow: hidden; }   /* механика крупно, фона вокруг — минимум */
 .gb-wrap-stage { position: relative; width: 100%; touch-action: none; user-select: none; }
 .gb-wrap-paper {
   width: 100%; display: block;
@@ -964,6 +964,7 @@ button.gb-half__disc:hover { transform: scale(1.04) rotate(-3deg); }
 .gb-fb__head { display: flex; align-items: center; gap: 0.7em; }
 .gb-fb__head .ku-icon-badge { background: var(--ku-danger-soft); color: var(--ku-danger); }
 .gb-fb.is-good .gb-fb__head .ku-icon-badge { background: var(--ku-success-soft); color: var(--ku-success); }
+.gb-fb.is-info .gb-fb__head .ku-icon-badge { background: var(--ku-surface-2); color: var(--ku-brand); }
 .gb-fb__title { font-family: var(--ku-font-display); font-size: 1.25rem; }
 .gb-fb__text { line-height: 1.55; margin: 0; white-space: pre-line; }
 .gb-fb__paused { font-size: 0.75rem; color: var(--ku-text-muted); display: inline-flex; gap: 0.35em; align-items: center; }
@@ -1397,3 +1398,15 @@ button.gb-half__disc:hover { transform: scale(1.04) rotate(-3deg); }
 .gb-role:disabled, .gb-role:disabled:hover { cursor: default; transform: none; }
 .gb-role:disabled.is-active { opacity: 1; }
 .gb-role.is-dim { opacity: .4; filter: grayscale(.4); }
+
+/* Сборка: сцена компактная — ингредиенты борта видны без прокрутки */
+.gb-onpaper { width: min(100%, 34rem); padding: clamp(0.5rem, 2.2%, 1.1rem) clamp(0.8rem, 4%, 2rem); }
+.gb-onpaper .gb-halves { flex-wrap: nowrap; }
+.gb-onpaper .gb-half__disc { width: clamp(6rem, min(22vw, 22vh), 11rem); }
+.gb-scene:has(.gb-onpaper) .gb-scene__stage, .gb-scene:has(.gb-onpaper) { min-height: 0; }
+.gb-scene:has(.gb-wrap-outer) .gb-scene__stage { padding-block: 0.4rem; }
+.gb-onpaper .gb-half__label { white-space: nowrap; font-size: 0.62rem; }
+/* Укладка на бумагу и заворот: сцена по размеру механики — фона станции только рамка */
+.gb-scene:has(.gb-wrap-outer) { width: min(100%, calc(min(36rem, 62vh) + 2.5rem)); margin-inline: auto; min-height: 0; }
+.gb-scene:has(.gb-wrap-outer) .gb-scene__stage { min-height: 0; }
+.gb-scene:has(.gb-wrap-outer) .gb-wrap-outer { width: min(100%, 36rem, 62vh); }

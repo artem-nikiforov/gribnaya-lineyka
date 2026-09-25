@@ -158,9 +158,12 @@
   // Порции соуса — крупные, компактным треугольником по центру, как на станции
   const SAUCE_POS = [[100, 76], [75, 120], [125, 120], [100, 116], [76, 82], [124, 82], [100, 150]];
   const TOMATO_POS = [[72, 90], [128, 110], [100, 100]];
+  // Майонез — по линии диаметра булочки (горизонталь через центр)
+  const MAYO_POS = [[68, 100], [132, 100], [100, 100], [52, 100], [148, 100]];
   const layerArt = {
-    sauceM: (i) => floret(SAUCE_POS[i % SAUCE_POS.length], V("sauce"), "#d6c4a4", false, i),
-    mayo: (i) => floret(SAUCE_POS[(i + 1) % SAUCE_POS.length], V("mayo"), "#fffaf0", true),
+    // соус Белые грибы — простые круглые капли
+    sauceM: (i) => { const [x, y] = SAUCE_POS[i % SAUCE_POS.length]; return `<circle cx="${x}" cy="${y}" r="17" style="fill:${V("sauce")};stroke:rgba(61,35,20,.16);stroke-width:1.2"/>`; },
+    mayo: (i) => floret(MAYO_POS[i % MAYO_POS.length], V("mayo"), "#fffaf0", true),
     // Айсберг — крупные рваные листья с белыми прожилками (по фото сборки со станции)
     iceberg: () => Array.from({ length: 26 }, (_, k) => {
       const r = rng(k + 11); const a = (k / 26) * Math.PI * 2 + r() * 0.6, d = 12 + Math.sqrt(r()) * 50;

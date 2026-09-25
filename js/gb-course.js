@@ -61,7 +61,6 @@
     if (scroll) scroll.onclick = (e) => { e.preventDefault(); ready ? $("#gb-contents").scrollIntoView({ behavior: reduce ? "auto" : "smooth" }) : toWho(); };
     if (!ready) return;
     const ids = chaptersFor(pos);
-    if (window.kuSetChapters) window.kuSetChapters(ids);
     // карточки оглавления: только нужные главы, в нужном порядке и с нумерацией
     const grid = $(".gb-chapters");
     ids.forEach((id, i) => {
@@ -76,7 +75,10 @@
       const head = $(`[data-chapter-num="${id}"]`);
       if (head) head.textContent = "Глава " + (i + 1);
     });
-    $$("[data-chapter]").forEach(c => { if (!ids.includes(c.dataset.chapter)) c.hidden = true; });
+    // лишние главы прячем и снимаем с них id — иначе дубли ku-home-card-N путают замки
+    $$("[data-chapter]").forEach(c => { if (!ids.includes(c.dataset.chapter)) { c.hidden = true; c.removeAttribute("id"); c.classList.remove("locked"); } });
+    // замки считаем уже по новой нумерации карточек
+    if (window.kuSetChapters) window.kuSetChapters(ids);
     const lead = $("#gb-trainer-lead");
     if (lead) lead.textContent = pos === "aup"
       ? "Короткий тренажёр повара: собери и упакуй Ангус Белые грибы два раза без ошибок."
@@ -566,6 +568,12 @@
       onExit: paint,
     });
   }
+  // курс можно завершить, когда каждый нужный тренажёр пройден до конца — с любым результатом
+  function allTried() {
+    const roleKey = roleKeyOf();
+    if (!roleKey) return false;
+    return ROLES[roleKey].need.every(t => { const b = KUv.get(bestKey(t)); return b !== undefined && b !== null && b !== ""; });
+  }
   function allPassed() {
     const roleKey = roleKeyOf();
     if (!roleKey) return false;
@@ -596,7 +604,7 @@
         }).join("");
       }
     }
-    const ok = allPassed();
+    const ok = allTried();
     const fin = $("#gb-trainer-next"); if (fin) fin.disabled = !ok;
     const note = $("#gb-trainer-note"); if (note) note.hidden = ok || !roleKey;
     // Финальный экран
@@ -608,9 +616,9 @@
 
   /* ══ 6. ОТМЕТКИ НА ОГЛАВЛЕНИИ ═══════════════════════════════════════ */
   function markCards() {
-    const done = { ingredients: KUv.isDone("ch-ingredients"), cooking: KUv.isDone("ch-cooking"), trainer: allPassed() };
+    const done = { ingredients: KUv.isDone("ch-ingredients"), cooking: KUv.isDone("ch-cooking"), trainer: allTried() };
     $$("[data-chapter]").forEach(c => c.classList.toggle("is-done", !!done[c.dataset.chapter]));
-    const fin = $("#gb-home-finish"); if (fin) fin.hidden = !allPassed();
+    const fin = $("#gb-home-finish"); if (fin) fin.hidden = !allTried();
   }
 
   /* ── Переходы между страницами: сообщаем модулям ─────────────────── */

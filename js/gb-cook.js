@@ -63,7 +63,7 @@
       hint: "Тяни край бумаги с оранжевым логотипом вверх — он должен лечь на середину сэндвича.",
       err: "Логотип Бургер Кинг должен оказаться строго по центру булочки. Попробуй ещё раз.",
     },
-    scaleNoWeigh: "Пока привыкаешь к новой порции, проверяй вес грибов на весах. Нажми «Проверить на весах».",
+    scaleNoWeigh: "Ты не взвесил грибы. Ошибкой это не считается, но пока привыкаешь к новой порции, проверяй вес на весах: 2 ложки — 40 граммов.",
   };
   const topHint = "Чтобы добавить ингредиент, нажми на него — один или несколько раз.";
   // Какая булочка у блюда: подпись у половинок, чтобы не взять не ту
@@ -123,7 +123,7 @@
     {
       id: "angus", name: "Ангус Белые грибы", limit: 150, size: "angus",
       steps: [
-        T.paper, T.buns,
+        T.paper,
         topSauce("sauceM", 3),
         build("bottom", [
           { ing: "mayo", n: 2, err: "Сразу на нижнюю часть булочки — майонез: 2 нажатия." },
@@ -141,7 +141,7 @@
     {
       id: "angus-hot-double", name: "Острый Ангус Белые грибы Двойной", limit: 120, size: "angus",
       steps: [
-        T.paper, T.buns,
+        T.paper,
         topSauce("sauceM", 3),
         build("bottom", [
           { ing: "mayo", n: 2, err: "Сразу на нижнюю часть булочки — майонез: 2 нажатия." },
@@ -180,7 +180,7 @@
     {
       id: "bigking", name: "Биг Кинг Белые грибы", limit: 120, size: "bigking",
       steps: [
-        T.paper, T.buns,
+        T.paper,
         topSauce("sauceM", 2),
         build("bottom", [
           patty("pattyH"),
@@ -199,7 +199,7 @@
     {
       id: "whopper", name: "Воппер Белые грибы", limit: 120, size: "whopper",
       steps: [
-        T.paper, T.buns,
+        T.paper,
         topSauce("mayo", 3),
         build("bottom", [
           patty("pattyW"),
@@ -216,7 +216,7 @@
     {
       id: "whopper-double-cheese", name: "Двойной Воппер с сыром Белые грибы", limit: 120, size: "whopper",
       steps: [
-        T.paper, T.buns,
+        T.paper,
         topSauce("mayo", 3),
         build("bottom", [
           patty("pattyW"),
@@ -236,7 +236,7 @@
     {
       id: "whopper-cheese", name: "Воппер с сыром Белые грибы", limit: 120, size: "whopper",
       steps: [
-        T.paper, T.buns,
+        T.paper,
         topSauce("mayo", 3),
         build("bottom", [
           patty("pattyW"),
@@ -254,7 +254,7 @@
     {
       id: "whopper-triple", name: "Тройной Воппер Белые грибы", limit: 120, size: "whopper",
       steps: [
-        T.paper, T.buns,
+        T.paper,
         topSauce("mayo", 3),
         build("bottom", [
           patty("pattyW"),
@@ -661,8 +661,10 @@
         if (w) w.addEventListener("click", () => { weighed = true; renderExtra(); });
         const sn = extra.querySelector("#gb-scale-next");
         if (sn) sn.addEventListener("click", async () => {
-          if (!weighed) return ctx.fail(T.scaleNoWeigh);
           if (c < cur.n) return ctx.fail(cur.err);
+          if (!weighed) {                      // не взвесил — не ошибка, а напоминание
+            await S().feedback({ tone: "info", title: "Не забудь про весы", text: T.scaleNoWeigh, primary: "Понятно" });
+          }
           advance();
         });
       }
