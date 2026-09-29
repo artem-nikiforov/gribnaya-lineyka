@@ -310,12 +310,19 @@
           window.parent.postMessage({ type: "ku:close-course", courseId: COURSE_ID }, "*");
         }
       } catch (e) {}
-      // окно курса, открытое LMS отдельно, закрываем; во встроенном плеере браузер это не даст —
-      // тогда на экране остаётся сообщение, что курс завершён и окно можно закрыть
-      try { if (window.opener && !window.opener.closed) window.close(); } catch (e) {}
-      try { if (window.top !== window && window.top.opener) window.top.close(); } catch (e) {}
+      closeCourseWindow();
     }, 400);
   }
+  /* Закрыть окно курса. Плеер LMS обычно держит курс во фрейме — закрывать нужно верхнее окно.
+     window.top.close() разрешён и для чужого домена (читать top.opener — нет, поэтому без проверок).
+     Браузер закроет окно, только если его открыл скрипт (window.open) — так LMS и открывают курс.
+     Если LMS открыла курс в той же вкладке — закрыть нельзя, остаётся сообщение «окно можно закрыть». */
+  function closeCourseWindow() {
+    try { window.top.close(); } catch (e) {}
+    try { window.close(); } catch (e) {}
+    try { if (window.parent !== window) window.parent.close(); } catch (e) {}
+  }
+
   function bindComplete() {
     document.querySelectorAll("[data-ku-complete]").forEach((btn) =>
       btn.addEventListener("click", complete));
