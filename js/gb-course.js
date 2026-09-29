@@ -90,10 +90,10 @@
     // переходы между главами зависят от состава
     const ingrNext = $("#gb-ingr-next"), cookNext = $("#gb-cooking-next");
     if (cookNext) cookNext.innerHTML = pos === "aup"
-      ? `${icon("i-right", "arrow")} Дальше: ингредиенты`
-      : `${icon("i-trophy")} Дальше: тренажёр`;
+      ? `Дальше: ингредиенты ${icon("i-right", "arrow")}`
+      : `Дальше: тренажёр ${icon("i-right", "arrow")}`;
     if (cookNext) cookNext.onclick = () => kuNavigate(pos === "aup" ? "ingredients" : "trainer");
-    if (ingrNext) { ingrNext.innerHTML = `${icon("i-trophy")} Дальше: тренажёр`; ingrNext.onclick = () => kuNavigate("trainer"); }
+    if (ingrNext) { ingrNext.innerHTML = `Дальше: тренажёр ${icon("i-right", "arrow")}`; ingrNext.onclick = () => kuNavigate("trainer"); }
     setVar("position", POS_NAME[pos] || "");
     setVar("role", pos === "aup" ? "Повар (АУП: короткий тренажёр)" : ROLE_NAME[role] || "");
     paintRoles();
@@ -487,13 +487,11 @@
         </div>
         <div class="ku-space s"></div>
         <button class="ku-btn soft" data-pq-restart>${icon("i-refresh")} Пройти ещё раз</button>`;
-      const n = $("#gb-pack-next"); if (n) n.disabled = false;
     };
     root.addEventListener("click", (e) => { if (e.target.closest("[data-pq-restart]")) { rebuild(); } });
     const template = root.querySelector("[data-pq-body]").innerHTML;
     const rebuild = () => { qi = 0; root.querySelector("[data-pq-body]").innerHTML = template; draw(); };
     draw();
-    document.addEventListener("ku:ready", () => { if (KUv.isDone("pack-quiz")) { const n = $("#gb-pack-next"); if (n) n.disabled = false; } });
   }
 
   /* ══ 5. ТРЕНАЖЁР: РОЛЬ, ЗАПУСК, ДОПУСК ══════════════════════════════ */
