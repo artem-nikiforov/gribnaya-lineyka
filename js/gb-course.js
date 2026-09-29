@@ -35,6 +35,8 @@
   const crewRole = () => KUv.get("role-key");
   // у АУП роль не выбирают: тренажёр всегда «Повар»
   const roleKeyOf = () => position() === "aup" ? "cook" : crewRole();
+  // выбор должности можно менять, пока сотрудник не открыл первую главу
+  const started = () => KUv.get("course-started") === "1";
 
   function applyPosition() {
     const pos = position();
@@ -45,15 +47,17 @@
     if (roleBox) roleBox.hidden = pos !== "crew";
     const ready = pos === "aup" || (pos === "crew" && role);
     if (contents) contents.hidden = !ready;
-    // курс линейный: выбор делается один раз — после него карточки закрыты
+    // курс линейный: как только открыта первая глава, выбор закрыт
+    const fixed = !!ready && started();
     $$("[data-pos], #gb-who-role [data-role]").forEach(b => {
       const chosen = b.dataset.pos ? b.dataset.pos === pos : b.dataset.role === role;
-      b.disabled = !!ready; b.classList.toggle("is-dim", !!ready && !chosen);
+      b.disabled = fixed; b.classList.toggle("is-dim", fixed && !chosen);
     });
     const note = $("#gb-who-note");
     if (note) note.textContent = !pos ? "Выбери должность — после этого откроются главы курса."
       : pos === "crew" && !role ? "Выбери позицию — после этого откроются главы курса."
-      : `Выбрано: ${pos === "aup" ? "АУП" : "член бригады, " + ROLE_NAME[role].toLowerCase()}. Главы курса — ниже.`;
+      : `Выбрано: ${pos === "aup" ? "АУП" : "член бригады, " + ROLE_NAME[role].toLowerCase()}. ` +
+        (fixed ? "Главы курса — ниже." : "Главы курса — ниже. Пока не начал первую главу, выбор можно поменять.");
     const toWho = () => $("#gb-who").scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
     const start = $("#gb-start");
     if (start) start.onclick = ready ? () => kuNavigate(chaptersFor(pos)[0]) : toWho;
@@ -97,7 +101,7 @@
     markCards();
   }
   function initWho() {
-    const locked = () => position() === "aup" || (position() === "crew" && !!crewRole());
+    const locked = () => started();
     $$("[data-pos]").forEach(b => b.addEventListener("click", () => {
       if (locked()) return;
       log("who", { n: "position", v: b.dataset.pos });
@@ -625,12 +629,27 @@
   function hookNavigate() {
     const orig = window.kuNavigate;
     window.kuNavigate = function (id) {
+      // первая открытая глава закрепляет выбор должности
+      const pos = position();
+      if (!started() && (pos === "aup" || (pos === "crew" && crewRole())) && chaptersFor(pos).includes(id)) {
+        KUv.set("course-started", "1");
+        applyPosition();
+      }
       orig(id);
       window.scrollTo({ top: 0, behavior: "auto" });
       setTimeout(() => document.dispatchEvent(new CustomEvent("gb:page", { detail: id })), 60);
       markCards();
     };
   }
+
+  // курс завершён — говорим об этом прямо: во встроенном плеере LMS окно само не закроется
+  function showFinalDone() {
+    const done = !!(window.KU && window.KU.state && window.KU.state.completed);
+    const el = $("#gb-final-done"); if (el) el.hidden = !done;
+    if (done) { const l = $("#gb-final-lock"); if (l) l.hidden = true; }
+  }
+  document.addEventListener("ku:completed", showFinalDone);
+  document.addEventListener("ku:ready", showFinalDone);
 
   document.addEventListener("DOMContentLoaded", () => {
     hookNavigate();

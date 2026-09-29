@@ -199,9 +199,9 @@ body { background: var(--ku-bg); overflow-x: hidden; }
 .gb-chapter-card .ku-lock-badge { z-index: 2; }
 .gb-chapter-card.locked { opacity: 0.6; pointer-events: none; filter: grayscale(0.4); }
 .gb-chapter-card.locked .ku-lock-badge { display: grid; }
+.gb-chapter-card__meta { display: flex; align-items: center; justify-content: space-between; gap: 0.6em; min-height: 1.6em; }
 .gb-chapter-card .gb-done-badge {
-  position: absolute; top: 0.9em; left: 0.9em; z-index: 2;
-  display: none; align-items: center; gap: 0.35em;
+  display: none; align-items: center; gap: 0.35em; white-space: nowrap;
   padding: 0.3em 0.7em; border-radius: var(--ku-radius-pill);
   background: var(--ku-card); color: var(--ku-success); font-size: 0.75rem; font-weight: 700;
   box-shadow: var(--ku-shadow-s);
@@ -1410,3 +1410,9 @@ button.gb-half__disc:hover { transform: scale(1.04) rotate(-3deg); }
 .gb-scene:has(.gb-wrap-outer) { width: min(100%, calc(min(36rem, 62vh) + 2.5rem)); margin-inline: auto; min-height: 0; }
 .gb-scene:has(.gb-wrap-outer) .gb-scene__stage { min-height: 0; }
 .gb-scene:has(.gb-wrap-outer) .gb-wrap-outer { width: min(100%, 36rem, 62vh); }
+
+.gb-final-done { display: inline-flex; align-items: center; gap: .4em; margin-top: .9em; color: var(--ku-success); font-weight: 700; }
+.gb-final-done[hidden] { display: none; }
+
+.gb-markpack__box--side { width: min(100%, 16rem); }
+.gb-markpack__box--side img { width: 100%; display: block; border-radius: var(--ku-radius-m); box-shadow: var(--ku-shadow-s); }

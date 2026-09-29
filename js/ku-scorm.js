@@ -289,7 +289,9 @@
   function complete() {
     state.completed = true;
     if (lmsReady) {
-      lmsSet("cmi.core.lesson_status", "completed");
+      // «passed» засчитывают как пройденный курс все LMS; «completed» некоторые оставляют «в процессе»
+      lmsSet("cmi.core.lesson_status", "passed");
+      lmsSet("cmi.core.exit", "");                 // обычный выход: попытка закончена, не «на паузе»
       lmsCommit();
     }
     save();
@@ -308,10 +310,11 @@
           window.parent.postMessage({ type: "ku:close-course", courseId: COURSE_ID }, "*");
         }
       } catch (e) {}
-      try {
-        if (window.opener && !window.opener.closed) window.close();
-      } catch (e) {}
-    }, 100);
+      // окно курса, открытое LMS отдельно, закрываем; во встроенном плеере браузер это не даст —
+      // тогда на экране остаётся сообщение, что курс завершён и окно можно закрыть
+      try { if (window.opener && !window.opener.closed) window.close(); } catch (e) {}
+      try { if (window.top !== window && window.top.opener) window.top.close(); } catch (e) {}
+    }, 400);
   }
   function bindComplete() {
     document.querySelectorAll("[data-ku-complete]").forEach((btn) =>
@@ -355,7 +358,11 @@
           e.target.hasAttribute("data-ku-var")) renderReports();
     });
   });
-  window.addEventListener("beforeunload", () => { save(); lmsFinish(); });
+  window.addEventListener("beforeunload", () => {
+    // закрыли, не завершив: «suspend» — LMS сохранит прогресс и продолжит с того же места
+    if (lmsReady && !state.completed) lmsSet("cmi.core.exit", "suspend");
+    save(); lmsFinish();
+  });
 
   /* ══ ЭКСПОРТ ════════════════════════════════════════════════════════ */
   window.KU = {

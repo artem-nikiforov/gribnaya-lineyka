@@ -705,7 +705,8 @@
         });
         return;
       }
-      ctx.host.innerHTML = scene(`<div class="gb-halves" id="gb-halves"></div>`);
+      // бумага остаётся под сэндвичем и на этом шаге
+      ctx.host.innerHTML = scene(`<div class="gb-onpaper"><div class="gb-halves" id="gb-halves"></div></div>`);
       drawHalves(ctx, false, true);
       ctx.host.querySelector("#gb-halves").addEventListener("click", async (e) => {
         const b = e.target.closest("[data-part]"); if (!b) return;
@@ -766,8 +767,7 @@
       ctx.host.innerHTML = scene(wrapStage(w, line, `
           <div class="gb-fold-flap" id="gb-fold"></div>
           <div class="gb-fold-flap-grip" id="gb-grip">${icon("i-up", "s")} Тяни край вверх</div>
-          <div class="gb-fold-center" id="gb-center"></div>
-          <div class="gb-wrap-hint">Пунктир — середина сэндвича. Логотип должен лечь на него</div>`, true),
+          <div class="gb-fold-center" id="gb-center"></div>`, true),
         `<button class="ku-btn primary" id="gb-fold-done">${icon("i-check")} Подтвердить заворот</button>`);
       const stage = ctx.host.querySelector("#gb-stage");
       const paper = ctx.host.querySelector("#gb-wpaper");
@@ -852,9 +852,24 @@
             ${label}<span class="gb-mark__ok">отмечено</span></button>`).join("")}
         </div></div>`);
       const draw = () => {
-        // пита — рендер 3D-модели: ребро с клапанами до и после продавливания «Сезонный»
-        ctx.host.querySelector("#gb-mp").innerHTML = step.pack === "pita"
-          ? `<span class="gb-pkimg"><img src="assets/trainer/${marked.includes("Сезонный") ? "cashier/pita-sezonnyi" : "cook/pita-edge"}.webp" alt="Торец упаковки питы с клапанами" draggable="false"></span>`
+        // рендеры 3D-моделей упаковок: сторона с клапанами до и после продавливания,
+        // наклейки «Остро» и «Двойная котлета» у Ангуса — поверх, как у кассира
+        const m = (l) => marked.includes(l);
+        let file, alt;
+        if (step.pack === "pita") { file = m("Сезонный") ? "cashier/pita-sezonnyi" : "cook/pita-edge"; alt = "Торец упаковки питы с клапанами"; }
+        else if (step.pack === "angus") { file = "cashier/" + (m("Сезонный") ? "angus-sezonnyi" : "angus-none"); alt = "Кламшелл Ангус, сторона с клапанами"; }
+        else if (step.pack === "bigking") { file = "cashier/" + (m("Звезда") ? "bigking-zvezda" : "bigking-none"); alt = "Упаковка Биг Кинг, клапаны «Классика» и «Звезда»"; }
+        else if (step.pack === "whopper") {
+          const keys = [m("Белые грибы") && "bg", m("Двойная котлета") && "double", m("Тройная котлета") && "triple", m("Сыр") && "cheese"].filter(Boolean);
+          const WH = { "": "none", "bg": "bg", "bg,cheese": "bg-cheese", "bg,double": "bg-double", "bg,triple": "bg-triple",
+            "bg,cheese,double": "bg-dbl-cheese", "double": "double", "cheese": "cheese", "triple": "triple", "cheese,double": "double-cheese" };
+          file = "cashier/whopper-" + (WH[keys.sort().join(",")] || "none"); alt = "Кламшелл «Твой особенный Воппер», крышка с клапанами";
+        }
+        const stickers = step.pack === "angus"
+          ? (m("Наклейка «Остро»") ? `<span class="gb-sticker gb-sticker--hot">ОСТРО</span>` : "") + (m("Двойная котлета") ? `<span class="gb-sticker gb-sticker--mark">ДВОЙНАЯ КОТЛЕТА</span>` : "")
+          : "";
+        ctx.host.querySelector("#gb-mp").innerHTML = file
+          ? `<span class="gb-pkimg"><img src="assets/trainer/${file}.webp" alt="${alt}" draggable="false">${stickers}</span>`
           : ART().pack(step.pack, { view: "marks", zoom: true, marks: marked.map(markObj) });
       };
       draw();
@@ -874,8 +889,8 @@
       const { step } = ctx;
       ctx.host.innerHTML = scene(`<div class="gb-markpack">
         <span class="gb-meter">${icon("i-clock", "s")} Время на станции: <b>${step.now}</b></span>
-        <div class="gb-markpack__box">${ART().pack("bigking", { view: "marks", zoom: true, marks: [] })}</div>
-        <div class="ku-caption">Временная шкала на упаковке</div>
+        <div class="gb-markpack__box gb-markpack__box--side"><img src="assets/trainer/cook/bigking-side.webp" alt="Боковая стенка упаковки Биг Кинг: «Вариант приготовления бургера» и временная шкала от 1 до 12" draggable="false"></div>
+        <div class="ku-caption">Временная шкала на боковой стенке упаковки</div>
         <div class="gb-timeline" id="gb-tl">${Array.from({ length: 12 }, (_, k) => `<button data-h="${k + 1}">${k + 1}</button>`).join("")}</div>
       </div>`);
       ctx.host.querySelector("#gb-tl").addEventListener("click", async (e) => {

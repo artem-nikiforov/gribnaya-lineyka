@@ -176,30 +176,27 @@
         <div class="gb-chapters gb-chapters--3">
           <button class="ku-card hover-lift gb-chapter-card ku-reveal" style="--d:1" id="ku-home-card-1" data-chapter="ingredients" onclick="kuNavigate('ingredients')">
             <span class="ku-lock-badge"><svg class="ku-ico s"><use href="#i-lock"/></svg></span>
-            <span class="gb-done-badge"><svg class="ku-ico s"><use href="#i-check"/></svg> Пройдено</span>
             <div class="gb-chapter-card__art" data-cardart="ingredients"></div>
             <div class="gb-chapter-card__body">
-              <span class="gb-chapter-card__num">Глава 1</span>
+              <div class="gb-chapter-card__meta"><span class="gb-chapter-card__num">Глава 1</span><span class="gb-done-badge"><svg class="ku-ico s"><use href="#i-check"/></svg> Пройдено</span></div>
               <h3>Ингредиенты</h3>
               <p>Соус и грибы: как хранятся, сколько и как разогреть грибы перед выкладкой на борт.</p>
             </div>
           </button>
           <button class="ku-card hover-lift gb-chapter-card locked ku-reveal" style="--d:2" id="ku-home-card-2" data-chapter="cooking" onclick="kuNavigate('cooking')">
             <span class="ku-lock-badge"><svg class="ku-ico s"><use href="#i-lock"/></svg></span>
-            <span class="gb-done-badge"><svg class="ku-ico s"><use href="#i-check"/></svg> Пройдено</span>
             <div class="gb-chapter-card__art" data-cardart="cooking"></div>
             <div class="gb-chapter-card__body">
-              <span class="gb-chapter-card__num">Глава 2</span>
+              <div class="gb-chapter-card__meta"><span class="gb-chapter-card__num">Глава 2</span><span class="gb-done-badge"><svg class="ku-ico s"><use href="#i-check"/></svg> Пройдено</span></div>
               <h3>Приготовление</h3>
               <p>Четыре блюда: Ангус, Биг Кинг, Пита и Воппер. Видео сборки, шпаргалки и упаковка каждого.</p>
             </div>
           </button>
           <button class="ku-card hover-lift gb-chapter-card locked ku-reveal" style="--d:3" id="ku-home-card-3" data-chapter="trainer" onclick="kuNavigate('trainer')">
             <span class="ku-lock-badge"><svg class="ku-ico s"><use href="#i-lock"/></svg></span>
-            <span class="gb-done-badge"><svg class="ku-ico s"><use href="#i-check"/></svg> Пройдено</span>
             <div class="gb-chapter-card__art" data-cardart="trainer"></div>
             <div class="gb-chapter-card__body">
-              <span class="gb-chapter-card__num">Глава 3</span>
+              <div class="gb-chapter-card__meta"><span class="gb-chapter-card__num">Глава 3</span><span class="gb-done-badge"><svg class="ku-ico s"><use href="#i-check"/></svg> Пройдено</span></div>
               <h3>Тренажёр</h3>
               <p>Повар собирает и упаковывает заказы, кассир проверяет маркировку. Универсал проходит оба.</p>
             </div>
@@ -1040,17 +1037,12 @@
         <div class="ku-space m"></div>
 
         <div class="ku-report" data-ku-report="position,role,cook-result,cashier-result" style="text-align:left"></div>
-        <div class="ku-space s"></div>
-        <div class="ku-row center">
-          <button class="ku-btn soft" data-ku-report-copy><svg class="ku-ico"><use href="#i-copy"/></svg> Скопировать результаты</button>
-          <button class="ku-btn soft" data-ku-report-download><svg class="ku-ico"><use href="#i-download"/></svg> Скачать .txt</button>
-        </div>
         <div class="ku-space l"></div>
 
         <button class="ku-btn primary l" data-ku-complete disabled>
           <svg class="ku-ico"><use href="#i-check"/></svg> Завершить курс
         </button>
-        <p class="ku-caption" style="margin-top:0.8em">Кнопка передаёт в LMS статус «Пройден».</p>
+        <p class="gb-final-done" id="gb-final-done" hidden><svg class="ku-ico s"><use href="#i-check"/></svg> Курс завершён, результат отправлен. Окно можно закрыть.</p>
         <p class="gb-final-lock" id="gb-final-lock" hidden><svg class="ku-ico s"><use href="#i-lock"/></svg> Чтобы завершить курс, пройди тренажёры своей роли до конца — с любым результатом.
           <button class="ku-btn ghost" onclick="kuNavigate('trainer')">К тренажёру</button></p>
       </div>
