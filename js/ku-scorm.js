@@ -286,15 +286,33 @@
   }
 
   /* ══ 6. ЗАВЕРШЕНИЕ — ТОЛЬКО КНОПКОЙ ═════════════════════════════════ */
+  /* Длительность сеанса для cmi.core.session_time — формат SCORM 1.2 HHHH:MM:SS.SS */
+  const SESSION_START = Date.now();
+  function sessionTime() {
+    const t = Math.max(0, (Date.now() - SESSION_START) / 1000);
+    const h = Math.floor(t / 3600), m = Math.floor((t % 3600) / 60), s = t % 60;
+    return String(h).padStart(4, "0") + ":" + String(m).padStart(2, "0") + ":" + s.toFixed(2).padStart(5, "0");
+  }
+
+  /* Завершение — единственное место, где курс ставит completed/passed (tools/SCORM_QA_PRINCIPLES.md, 1.5):
+     score.* → completed → passed → Commit → session_time → exit=logout → Commit → LMSFinish.
+     WebTutor ставит «флажок» прохождения и закрывает окно по passed; сессию закрываем сразу,
+     не дожидаясь beforeunload — в iframe LMS он часто не приходит. */
   function complete() {
+    if (state.completed && !lmsReady) return;      // уже завершён и сессия закрыта
     state.completed = true;
+    save();                                         // прогресс и suspend_data — до закрытия сессии
     if (lmsReady) {
-      // «passed» засчитывают как пройденный курс все LMS; «completed» некоторые оставляют «в процессе»
+      lmsSet("cmi.core.score.min", "0");
+      lmsSet("cmi.core.score.max", "100");
+      lmsSet("cmi.core.score.raw", "100");
+      lmsSet("cmi.core.lesson_status", "completed");
       lmsSet("cmi.core.lesson_status", "passed");
-      lmsSet("cmi.core.exit", "");                 // обычный выход: попытка закончена, не «на паузе»
+      lmsCommit();
+      lmsSet("cmi.core.session_time", sessionTime());
+      lmsSet("cmi.core.exit", "logout");
       lmsCommit();
     }
-    save();
     document.querySelectorAll("[data-ku-complete]").forEach((b) => {
       b.classList.add("is-completed");
       b.disabled = true;
@@ -365,11 +383,20 @@
           e.target.hasAttribute("data-ku-var")) renderReports();
     });
   });
-  window.addEventListener("beforeunload", () => {
-    // закрыли, не завершив: «suspend» — LMS сохранит прогресс и продолжит с того же места
-    if (lmsReady && !state.completed) lmsSet("cmi.core.exit", "suspend");
-    save(); lmsFinish();
-  });
+  // Ушли, не завершив: «suspend» — LMS сохранит прогресс и продолжит с того же места.
+  // pagehide надёжнее beforeunload (мобильные браузеры, iframe); lmsFinish срабатывает один раз.
+  function leave() {
+    if (!lmsReady) return;
+    save();
+    if (!state.completed) {
+      lmsSet("cmi.core.session_time", sessionTime());
+      lmsSet("cmi.core.exit", "suspend");
+      lmsCommit();
+    }
+    lmsFinish();
+  }
+  window.addEventListener("pagehide", leave);
+  window.addEventListener("beforeunload", leave);
 
   /* ══ ЭКСПОРТ ════════════════════════════════════════════════════════ */
   window.KU = {
