@@ -294,34 +294,44 @@
     return String(h).padStart(4, "0") + ":" + String(m).padStart(2, "0") + ":" + s.toFixed(2).padStart(5, "0");
   }
 
-  /* Завершение — единственное место, где курс ставит completed/passed (tools/SCORM_QA_PRINCIPLES.md, 1.5):
-     score.* → completed → passed → Commit → session_time → exit=logout → Commit → LMSFinish.
-     WebTutor ставит «флажок» прохождения и закрывает окно по passed; сессию закрываем сразу,
-     не дожидаясь beforeunload — в iframe LMS он часто не приходит. */
   function complete() {
     if (state.completed && !lmsReady) return;      // уже завершён и сессия закрыта
     state.completed = true;
-    save();                                         // прогресс и suspend_data — до закрытия сессии
+    // Отклик кнопки — ДО вызовов LMS: в WebTutor они синхронные и блокируют отрисовку.
+    const btns = document.querySelectorAll("[data-ku-complete]");
+    btns.forEach((b) => {
+      b.disabled = true;
+      b.setAttribute("aria-disabled", "true");
+      b.dataset.kuLabel = b.innerHTML;
+      b.textContent = "Сохраняем результат…";
+    });
+    // даём браузеру нарисовать «Сохраняем…», потом одним пакетом пишем в LMS
+    requestAnimationFrame(() => setTimeout(finishSession, 30));
+  }
+  /* Закрытие попытки (tools/SCORM_QA_PRINCIPLES.md, 1.5) — единственное место, где курс ставит
+     completed/passed: score.* → completed → passed → suspend_data → session_time → exit="logout"
+     → ОДИН LMSCommit → LMSFinish. WebTutor ставит «флажок» и закрывает окно по passed; сессию
+     закрываем сразу, не дожидаясь beforeunload — в iframe LMS он часто не приходит. */
+  function finishSession() {
+    try { localStorage.setItem(LS_KEY, serialize(true)); } catch (e) {}
     if (lmsReady) {
       lmsSet("cmi.core.score.min", "0");
       lmsSet("cmi.core.score.max", "100");
       lmsSet("cmi.core.score.raw", "100");
       lmsSet("cmi.core.lesson_status", "completed");
       lmsSet("cmi.core.lesson_status", "passed");
-      lmsCommit();
+      lmsSet("cmi.suspend_data", serialize(false));
       lmsSet("cmi.core.session_time", sessionTime());
       lmsSet("cmi.core.exit", "logout");
       lmsCommit();
     }
     document.querySelectorAll("[data-ku-complete]").forEach((b) => {
       b.classList.add("is-completed");
-      b.disabled = true;
-      b.setAttribute("aria-disabled", "true");
+      if (b.dataset.kuLabel) b.innerHTML = b.dataset.kuLabel;
     });
     document.dispatchEvent(new CustomEvent("ku:completed"));
-    // В popup LMS браузер разрешает закрыть окно через window.close().
-    // Во встроенном iframe закрывает контейнер сама LMS по сообщению.
     lmsFinish();
+    // В окне, которое LMS открыла скриптом, закрываемся сами; во встроенном плеере — сообщение LMS.
     setTimeout(() => {
       try {
         if (window.parent && window.parent !== window) {
