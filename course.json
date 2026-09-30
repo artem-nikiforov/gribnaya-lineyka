@@ -3,6 +3,12 @@
   "title": "Коллекция Белые Грибы",
   "audience": "griby",
   "direction": "",
-  "_comment": "identifier — ключ прогресса (= data-ku-course на <html>), не менять. scorm_id — основной SCORM id курса в LMS: manifest = scorm_id, organization/item/resource = scorm_id_ORG/_SCO/_RES. Не менять. Сборка: python3 tools/pack_scorm.py course",
-  "scorm_id": "ku-gribnaya-lineyka-2026"
+  "_comment": "identifier — ключ прогресса (= data-ku-course на <html>), не менять. scorm_ids — точные id пакета, уже загруженного в LMS (ku-gribnaya-lineyka-2026.zip от 30.09): с ними LMS заменяет курс, а не заводит новый. Не менять. scorm_id — имя ZIP. Сборка: python3 tools/pack_scorm.py course",
+  "scorm_id": "ku-gribnaya-lineyka-2026",
+  "scorm_ids": {
+    "manifest": "ku-gribnaya-lineyka-2026-manifest",
+    "organization": "ku-gribnaya-lineyka-2026-org",
+    "item": "ku-gribnaya-lineyka-2026-item",
+    "resource": "ku-gribnaya-lineyka-2026-res"
+  }
 }
