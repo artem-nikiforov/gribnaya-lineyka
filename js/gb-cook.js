@@ -3,8 +3,8 @@
    ────────────────────────────────────────────────────────────────────────
    Сценарий: «Сценарий тренажера в курсе Белые грибы.xlsx», лист «Повар».
    8 блюд. На первое блюдо 2:30, на остальные по 2:00, общее время 30:00.
-   Балл за блюдо — если оно собрано без ошибок и в срок (решение методиста).
-   Порог прохождения — 6 баллов из 8.
+   Балл за блюдо — если оно собрано в срок и не больше чем с одной ошибкой (MAX_ERRORS).
+   Порог прохождения — 5 баллов из 8 (смягчено по статистике доходимости).
 
    Как устроено: DISHES — данные, STEP_RENDERERS — по одной функции на тип
    шага. Шаг вызывает ctx.ok() (дальше) или ctx.fail(текст) (ошибка →
@@ -16,9 +16,10 @@
 
   const S = () => window.GBShell;
   const ART = () => window.GBArt;
-  const PASS = 6;
+  const PASS = 5;
+  const MAX_ERRORS = 1;          // ошибок в блюде, при которых балл ещё начисляется
   // АУП проходит короткую версию: один рецепт (Ангус Белые грибы) два раза,
-  // зачёт — оба блюда без ошибок и в срок. Список блюд и порог берём отсюда.
+  // зачёт — оба блюда в срок и не больше чем с одной ошибкой. Список блюд и порог берём отсюда.
   const isAup = () => !!(window.KU && window.KU.vars.get("position-key") === "aup");
   const list = () => isAup() ? [DISHES[0], DISHES[0]] : DISHES;
   const pass = () => isAup() ? 2 : PASS;
@@ -313,7 +314,7 @@
             <ul>
               <li><svg class="ku-ico"><use href="#i-utensils"/></svg><span><b>8 блюд.</b> Таймер блюда запускается, когда нажимаешь «Принять»: на первое блюдо 2:30, на остальные по 2:00.</span></li>
               <li><svg class="ku-ico"><use href="#i-clock"/></svg><span><b>30 минут</b> на всю тренировку. Пока открыта подсказка об ошибке, таймеры стоят.</span></li>
-              <li><svg class="ku-ico"><use href="#i-star"/></svg><span><b>Балл</b> — за блюдо без ошибок, собранное в срок. Чтобы пройти тренажёр, набери <b>${pass()} из ${list().length}</b>.</span></li>
+              <li><svg class="ku-ico"><use href="#i-star"/></svg><span><b>Балл</b> — за блюдо, собранное в срок. Одна ошибка в блюде допускается, две и больше — балл не начисляется. Чтобы пройти тренажёр, набери <b>${pass()} из ${list().length}</b>.</span></li>
             </ul>
           </div>
           <button class="ku-btn primary l" id="gb-cook-go"><svg class="ku-ico"><use href="#i-play"/></svg> Начать тренировку</button>
@@ -445,7 +446,7 @@
     run.dishClock.pause();
     const time = run.dishClock.sec();
     const late = time > d.limit;
-    const point = errors.length === 0 && !late;
+    const point = errors.length <= MAX_ERRORS && !late;
     log("cook_dish", { n: d.id, c: point, ms: Math.round(time * 1000), errors: errors.length, late, limit: d.limit });
     if (point) run.score++;
     run.results.push({ name: d.name, time, limit: d.limit, errors: errors.slice(), point, late });
@@ -459,9 +460,11 @@
     }
     const last = run.di === run.dishes.length - 1;
     const verdict = point
-      ? `<b>+1 балл.</b> Блюдо собрано без ошибок за ${sh.fmt(time)}.`
+      ? (errors.length
+        ? `<b>+1 балл.</b> Блюдо собрано за ${sh.fmt(time)} с одной ошибкой — это допустимо. Разбор — в итогах.`
+        : `<b>+1 балл.</b> Блюдо собрано без ошибок за ${sh.fmt(time)}.`)
       : errors.length
-        ? `Блюдо готово, но балл не начислен: ${errors.length} ${plural(errors.length, "ошибка", "ошибки", "ошибок")}${late ? " и превышено время" : ""}. Разбор — в итогах.`
+        ? `Блюдо готово, но балл не начислен: ${errors.length} ${plural(errors.length, "ошибка", "ошибки", "ошибок")}${late ? " и превышено время" : ""} (допускается одна). Разбор — в итогах.`
         : `Блюдо собрано без ошибок, но на ${sh.fmt(time - d.limit)} дольше нормы — балл не начислен.`;
     sh.main().innerHTML = `
       <div class="gb-splash gb-bg">
@@ -525,7 +528,7 @@
                 ? (res.results.some(r => r.errors.length || r.late || r.skipped)
                   ? "Обрати внимание на блюда с ошибками и отработай их — в тренажёре или на практике в ресторане. Удачи!"
                   : "Все блюда собраны без ошибок и в срок. Удачи на смене!")
-                : `Чтобы пройти, нужно ${run.pass} ${run.pass === 1 ? "балл" : "балла"} из ${res.max}. Посмотри, в каких блюдах были ошибки, и попробуй ещё раз.`}</p>
+                : `Чтобы пройти, нужно ${run.pass} ${plural(run.pass, "балл", "балла", "баллов")} из ${res.max}. Посмотри, в каких блюдах были ошибки, и попробуй ещё раз.`}</p>
               <div class="gb-stats">
                 <span class="gb-meter"><svg class="ku-ico s"><use href="#i-clock"/></svg> Общее время ${sh.fmt(res.totalSec)}</span>
                 <span class="gb-meter">Ошибок: ${res.results.reduce((a, r) => a + r.errors.length, 0)}</span>
