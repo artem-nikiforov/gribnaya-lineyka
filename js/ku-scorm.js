@@ -335,26 +335,26 @@
     // даём браузеру нарисовать «Сохраняем…», потом одним пакетом пишем в LMS
     requestAnimationFrame(() => setTimeout(finishSession, 30));
   }
-  /* Результат — единственное место в коде, где пишутся passed и completed: сначала passed, затем completed. */
+  /* Результат — единственное место в коде, где пишутся completed и passed: итоговый статус — passed. */
   function writeResult() {
     lmsSet("cmi.core.score.min", "0");
     lmsSet("cmi.core.score.max", "100");
     lmsSet("cmi.core.score.raw", "100");
-    lmsSet("cmi.core.lesson_status", "passed");
     lmsSet("cmi.core.lesson_status", "completed");
+    lmsSet("cmi.core.lesson_status", "passed");
   }
   let resultSent = false;
-  /* «Завершить» в два шага — как при повторном входе, где WebTutor закрывает окно:
-     1) сразу: балл 100, passed, completed, прогресс → Commit (статус «Завершён» уже в LMS);
-     2) через FINISH_DELAY: время сеанса, exit="logout" → Commit → LMSFinish — по нему LMS
-        закрывает окно. Если passed и LMSFinish уходят одним пакетом, WebTutor показывает
-        свою страницу «До свидания» вместо закрытия. */
-  const FINISH_DELAY = 1500;
+  /* «Завершить» — так же, как «Пройти заново», после которого WebTutor корректно закрывает
+     курс, ставит «флажок» и уводит на опрос (в LMS включено «завершать курс»):
+     балл 100, completed → passed, прогресс → Commit, затем страница курса уходит БЕЗ
+     LMSFinish и без exit — попытку LMS закрывает сама. Наш LMSFinish с exit="logout"
+     WebTutor принимал за выход пользователя: «До свидания» / выкидывание из окна. */
   function finishSession() {
     try { localStorage.setItem(LS_KEY, serialize(true)); } catch (e) {}
     if (lmsReady) {
       writeResult(); resultSent = true;
       lmsSet("cmi.suspend_data", serialize(false));
+      lmsSet("cmi.core.session_time", sessionTime());
       lmsCommit();
     }
     document.querySelectorAll("[data-ku-complete]").forEach((b) => {
@@ -362,21 +362,13 @@
       if (b.dataset.kuLabel) b.innerHTML = b.dataset.kuLabel;
     });
     document.dispatchEvent(new CustomEvent("ku:completed"));
-    setTimeout(closeSession, FINISH_DELAY);
-  }
-  function closeSession() {
-    if (!lmsReady) return;                       // окно уже закрыли — LMSFinish отправил leave()
-    lmsSet("cmi.core.session_time", sessionTime());
-    lmsSet("cmi.core.exit", "logout");
-    lmsCommit();
-    lmsFinish();
-    // окно, открытое LMS скриптом, закрываем сами; во встроенном плеере — сообщение LMS
+    if (!lmsReady) return;                       // без LMS — просто сообщение на экране
     setTimeout(() => {
-      try { if (window.parent !== window) window.parent.postMessage({ type: "ku:close-course", courseId: COURSE_ID }, "*"); } catch (e) {}
-      try { window.top.close(); } catch (e) {}
-      try { window.close(); } catch (e) {}
+      reloading = true;                          // уход без LMSFinish (leave() пропускается)
+      location.reload();
     }, 300);
   }
+
 
 
   function bindComplete() {
