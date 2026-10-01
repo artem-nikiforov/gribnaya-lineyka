@@ -360,17 +360,22 @@
       if (b.dataset.kuLabel) b.innerHTML = b.dataset.kuLabel;
     });
     document.dispatchEvent(new CustomEvent("ku:completed"));
-    lmsFinish();
-    // В окне, которое LMS открыла скриптом, закрываемся сами; во встроенном плеере — сообщение LMS.
+    // WebTutor закрывает окно курса сам, увидев сохранённый passed. Если LMSFinish придёт раньше,
+    // он уводит плеер на свою страницу «До свидания» и окно остаётся открытым (так было при первом
+    // прохождении; при повторном входе passed уже лежал в LMS — и окно закрывалось). Поэтому даём
+    // LMS время закрыть окно, и только если оно ещё открыто — закрываем сессию и окно сами.
+    // Если LMS закроет окно раньше, LMSFinish отправит обработчик pagehide (leave).
     setTimeout(() => {
+      lmsFinish();
       try {
         if (window.parent && window.parent !== window) {
           window.parent.postMessage({ type: "ku:close-course", courseId: COURSE_ID }, "*");
         }
       } catch (e) {}
-      closeCourseWindow();
-    }, 400);
+      setTimeout(closeCourseWindow, 300);
+    }, FINISH_DELAY);
   }
+  const FINISH_DELAY = 1500;           // мс между сохранением результата и LMSFinish
   /* Закрыть окно курса. Плеер LMS обычно держит курс во фрейме — закрывать нужно верхнее окно.
      window.top.close() разрешён и для чужого домена (читать top.opener — нет, поэтому без проверок).
      Браузер закроет окно, только если его открыл скрипт (window.open) — так LMS и открывают курс.
