@@ -76,8 +76,10 @@
     api = findAPI(window);
     if (!api && window.opener) api = findAPI(window.opener);
     if (api) {
-      try { api.LMSInitialize(""); lmsReady = true; }
-      catch (e) { api = null; lmsReady = false; }
+      // после «Пройти заново» страница перезагружается в той же сессии: повторный LMSInitialize
+      // вернёт ошибку «уже инициализировано» — сессия при этом рабочая, продолжаем с ней
+      try { api.LMSInitialize(""); } catch (e) {}
+      lmsReady = true;
     }
   }
   function lmsGet(key) {
@@ -354,10 +356,25 @@
   function bindComplete() {
     document.querySelectorAll("[data-ku-complete]").forEach((btn) =>
       btn.addEventListener("click", complete));
-    if (state.completed) {
-      document.querySelectorAll("[data-ku-complete]")
-        .forEach((b) => b.classList.add("is-completed"));
-    }
+    // Кнопку при повторном входе НЕ блокируем: WebTutor открывает новую попытку «в процессе»,
+    // и закрыть её можно только завершением (или выбором «Выйти» на экране повторного входа).
+  }
+
+  /* Повторный вход в уже пройденный курс — выбор на экране курса (gb-course.js):
+     restart() — пройти заново: прогресс обнуляется, статус в LMS не понижается;
+     exitCompleted() — выйти: отправляем passed и закрываем попытку и окно, как кнопка «Завершить». */
+  let reloading = false;
+  function restart() {
+    state.unlocked = 1; state.done = {}; state.vars = {}; state.completed = false;
+    try { localStorage.removeItem(LS_KEY); } catch (e) {}
+    if (lmsReady) { lmsSet("cmi.suspend_data", serialize(false)); lmsCommit(); }
+    reloading = true;                    // перезагрузка без LMSFinish — сессия LMS остаётся открытой
+    location.reload();
+  }
+  function exitCompleted() {
+    state.completed = true;
+    document.querySelectorAll("[data-ku-complete]").forEach((b) => { b.disabled = true; });
+    finishSession();
   }
 
   /* ══ 7. ОТЧЁТ В LMS (cmi.interactions — опционально) ════════════════ */
@@ -396,7 +413,7 @@
   // Ушли, не завершив: «suspend» — LMS сохранит прогресс и продолжит с того же места.
   // pagehide надёжнее beforeunload (мобильные браузеры, iframe); lmsFinish срабатывает один раз.
   function leave() {
-    if (!lmsReady) return;
+    if (!lmsReady || reloading) return;
     save();
     if (!state.completed) {
       lmsSet("cmi.core.session_time", sessionTime());
@@ -419,6 +436,8 @@
     report: { text: reportText, render: renderReports },
     lms,
     complete,
+    restart,
+    exitCompleted,
     save,
     get state() { return state; },
     get inLMS() { return lmsReady; },

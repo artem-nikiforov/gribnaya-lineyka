@@ -647,7 +647,37 @@
     if (done) { const l = $("#gb-final-lock"); if (l) l.hidden = true; }
   }
   document.addEventListener("ku:completed", showFinalDone);
-  document.addEventListener("ku:ready", showFinalDone);
+
+  /* Повторный вход в пройденный курс: пройти заново или выйти (выход отправляет в LMS «Пройден»
+     и закрывает окно — новая попытка WebTutor не остаётся «в процессе»). */
+  function askAgain() {
+    if (!(window.KU && window.KU.state && window.KU.state.completed) || $("#gb-again")) return;
+    const box = document.createElement("div");
+    box.id = "gb-again"; box.className = "gb-again";
+    box.innerHTML = `<div class="gb-again__card ku-card" role="dialog" aria-modal="true" aria-labelledby="gb-again-title">
+        <span class="ku-icon-badge solid round">${icon("i-trophy")}</span>
+        <h2 class="ku-h3" id="gb-again-title">Курс уже пройден</h2>
+        <p>Можно пройти его ещё раз с начала или выйти — результат сохранится.</p>
+        <div class="ku-row center">
+          <button class="ku-btn primary l" data-again="restart">${icon("i-refresh")} Пройти заново</button>
+          <button class="ku-btn soft l" data-again="exit">Выйти из курса</button>
+        </div>
+        <p class="gb-again__note" hidden>Курс завершён, результат отправлен. Окно можно закрыть.</p>
+      </div>`;
+    document.body.appendChild(box);
+    document.body.style.overflow = "hidden";
+    box.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-again]"); if (!b) return;
+      box.querySelectorAll("[data-again]").forEach((x) => { x.disabled = true; });
+      if (b.dataset.again === "restart") { b.textContent = "Начинаем заново…"; window.KU.restart(); }
+      else {
+        b.textContent = "Сохраняем результат…";
+        setTimeout(() => { window.KU.exitCompleted(); box.querySelector(".gb-again__note").hidden = false; b.textContent = "Готово"; }, 30);
+      }
+    });
+    (box.querySelector('[data-again="restart"]') || box).focus();
+  }
+  document.addEventListener("ku:ready", askAgain);
 
   document.addEventListener("DOMContentLoaded", () => {
     hookNavigate();
