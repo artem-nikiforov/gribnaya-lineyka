@@ -1,56 +1,56 @@
 /* ════════════════════════════════════════════════════════════════════════
-   KU · SCORM-РАНТАЙМ КУРСА (SCORM 1.2 — всегда)
+   KU · SCORM-РАНТАЙМ КУРСА (SCORM 1.2) — ЭТАЛОН tools/runtime/ku-scorm.js
    ────────────────────────────────────────────────────────────────────────
-   Подключается в КАЖДЫЙ курс/тренажёр вторым скриптом (после kuds.js).
-   Агент НЕ пишет SCORM-код — всё уже здесь. Работает и вне LMS
-   (localStorage), и внутри (cmi.suspend_data + статусы).
+   Один файл на любой курс: копируется в <курс>/js/ku-scorm.js без правок.
+   Правила, по которым он устроен, — tools/SCORM_QA_PRINCIPLES.md (номера
+   разделов в комментариях). Сборщик tools/pack_scorm.py сверяет копию в
+   курсе с этим эталоном.
 
-   ЧТО ДЕЛАЕТ АВТОМАТИЧЕСКИ (без единой строчки кода в курсе):
-     • находит SCORM 1.2 API в окне LMS и инициализируется на window 'load';
-     • сохраняет и восстанавливает прогресс: открытые главы, решённые
-       упражнения ([data-ku-id]), значения переменных ([data-ku-var]);
-     • двойное хранилище: cmi.suspend_data (в LMS) + localStorage (всегда);
-     • один раз ставит lesson_status = incomplete и НИКОГДА не понижает
-       уже полученный completed;
-     • LMSCommit после каждой записи, LMSFinish при закрытии окна;
-     • рендерит сводки [data-ku-report], кнопки копирования/скачивания;
-     • завершает курс ТОЛЬКО по кнопке [data-ku-complete].
+   ПОДКЛЮЧЕНИЕ (в index.html курса):
+     <html data-ku-course="id-курса" data-ku-complete-mode="lms">
+       …
+       <button data-ku-complete>Завершить курс</button>   — где-то на финальном экране
+       <script src="js/ku-scorm.js"></script>             — до скриптов курса
+     data-ku-course        ключ прогресса = course.json → "identifier" (обязательно)
+     data-ku-complete-mode "lms" (WebTutor, по умолчанию) | "finish" (другие LMS)
+                           = course.json → "complete_mode"
 
-   ДЕКЛАРАТИВНЫЕ ХУКИ (размечаешь HTML — рантайм подхватывает):
+   ЧТО ДЕЛАЕТ САМ (курсу ничего писать не нужно):
+     • SCORM 1.2 API: поиск по parent/opener, LMSInitialize на window 'load';
+     • прогресс: главы, решённые упражнения ([data-ku-id]), поля ([data-ku-var]);
+       cmi.suspend_data (≤ 4096) + копия в localStorage, привязанная к ученику (1.7);
+     • incomplete — только незавершённому курсу, completed/passed не понижаются (1.6);
+     • «Завершить» ([data-ku-complete] или KU.complete()) — 1.5:
+         lms:    балл 100, completed → passed, Commit → пауза SAVE_WAIT →
+                 перезагрузка без LMSFinish → экран «Курс завершён»;
+         finish: … → exit=logout → Commit → LMSFinish → попытка закрыть окно;
+     • повторный вход в пройденный курс: сразу подтверждает passed и показывает
+       выбор «Пройти заново / Выйти» (1.6);
+     • уход без завершения: session_time, exit=suspend, LMSFinish (pagehide).
 
-     data-ku-course="id-курса"      на <html> — ключ хранилища (обязательно)
-     data-ku-id="упражнение-1"      на упражнении — прогресс решённости;
-                                    kuds.js сам вызывает markDone при верном
-                                    ответе; восстановление вешает класс .is-done
-     data-ku-var="имя"              на input/textarea/select — значение
-                                    автосохраняется и восстанавливается
-     data-ku-label="Подпись"        на том же поле — человекочитаемая подпись
-                                    для сводки (иначе берётся placeholder/имя)
-     data-ku-report="all|имя1,имя2" на контейнере — рендер сводки «подпись →
-                                    значение» (лист наставнику и т.п.)
-     data-ku-report-copy            кнопка «Скопировать сводку»
-     data-ku-report-download        кнопка «Скачать сводку» (.txt)
-     data-ku-complete               кнопка «Завершить курс» — ЕДИНСТВЕННЫЙ
-                                    способ поставить completed
+   КАСТОМИЗАЦИЯ ЭКРАНОВ: событие 'ku:reentry' (cancelable) — курс может
+   показать свой экран и вызвать event.preventDefault(); тогда встроенный не
+   появляется. Кнопки курса вызывают KU.restart() / KU.exitCompleted().
 
-   JS-API (для нестандартных сценариев — см. docs/SCORM.md):
+   JS-API:
      KU.vars.get(имя) / KU.vars.set(имя, значение) / KU.vars.all()
      KU.progress.markDone(id) / KU.progress.isDone(id)
      KU.progress.setUnlocked(n) / KU.progress.unlocked()
-     KU.report.text([имена])   — сводка строкой
-     KU.lms.interaction(id, response, result?) — записать ответ в
-       cmi.interactions.* (отчёты LMS; поддержка зависит от LMS — Websoft
-       проверяй на месте). Вызывай ПОСЛЕ проверки ответа.
+     KU.report.text([имена]) / KU.report.render()
+     KU.lms.interaction(id, response, result?) — cmi.interactions.*
+     KU.lms.learnerId()        — cmi.core.student_id (для аналитики)
      KU.complete()             — завершить (то же, что кнопка)
-     KU.save()                 — форс-сохранение (обычно не нужно)
+     KU.restart()              — пройти заново: сброс прогресса, статус не понижается
+     KU.exitCompleted()        — выйти из пройденного курса (как «Завершить»)
+     KU.save()                 — форс-сохранение
+     KU.state / KU.inLMS / KU.mode
 
-   СОБЫТИЯ (document): 'ku:ready' (состояние восстановлено, detail = state),
-     'ku:done' (решено упражнение, detail = id), 'ku:completed'.
+   СОБЫТИЯ (document): 'ku:ready' (detail = state), 'ku:done' (detail = id),
+     'ku:completed', 'ku:reentry' (cancelable).
 
-   ЛИМИТ: cmi.suspend_data ограничен ~4096 символами. Если состояние не
-   влезает (длинные свободные ответы) — в LMS уедет версия с обрезанными
-   значениями переменных, а ПОЛНАЯ сохранится в localStorage. Сводка на
-   финальном экране всегда собирается из полной версии.
+   ДЕКЛАРАТИВНЫЕ ХУКИ: data-ku-id, data-ku-var, data-ku-label,
+     data-ku-report="all|имя1,имя2", data-ku-report-copy, data-ku-report-download,
+     data-ku-complete.
    ════════════════════════════════════════════════════════════════════════ */
 (function () {
   "use strict";
@@ -103,6 +103,8 @@
   /* ══ 2. СОСТОЯНИЕ ═══════════════════════════════════════════════════ */
   const COURSE_ID =
     document.documentElement.getAttribute("data-ku-course") || location.pathname;
+  // Режим завершения (1.5): "lms" — WebTutor с «завершать курс»; "finish" — LMSFinish + logout
+  const MODE = document.documentElement.getAttribute("data-ku-complete-mode") === "finish" ? "finish" : "lms";
   /* Копия прогресса в localStorage — общая для всех, кто работает в этом браузере (общие
      компьютеры ресторана!). Поэтому в LMS ключ привязан к ученику (cmi.core.student_id):
      чужой прогресс не подхватывается и курс не засчитывается не тому человеку. Если LMS
@@ -118,6 +120,7 @@
     const id = lmsGet("cmi.core.student_id").trim();
     LS_KEY = id ? LS_BASE + "::" + id : "";
     RESTART_KEY = "ku-restart::" + COURSE_ID + (id ? "::" + id : "");
+    FINISH_KEY = "ku-finished::" + COURSE_ID + (id ? "::" + id : "");
     // общий ключ без ученика мог остаться от предыдущих версий курса — это чужой прогресс, убираем
     try { localStorage.removeItem(LS_BASE); } catch (e) {}
   }
@@ -178,9 +181,20 @@
     }
     return mark;
   }
-  let restarted = false;
+  /* «Завершаем»: метка ставится перед перезагрузкой в режиме lms. Если LMS не успела или не стала
+     закрывать окно, после перезагрузки курс показывает экран «Курс завершён», а не список глав
+     и не выбор повторного входа. Живёт FINISH_TTL мс и привязана к ученику. */
+  let FINISH_KEY = "ku-finished::" + COURSE_ID;
+  const FINISH_TTL = 60000;
+  function takeFinishMark() {
+    let t = 0;
+    try { t = +sessionStorage.getItem(FINISH_KEY) || 0; sessionStorage.removeItem(FINISH_KEY); } catch (e) {}
+    return t > 0 && Date.now() - t < FINISH_TTL;
+  }
+  let restarted = false, justFinished = false;
   function load() {
     restarted = takeRestartMark();
+    justFinished = !restarted && takeFinishMark();
     if (restarted) {                       // чистый старт: ни suspend_data, ни localStorage не читаем
       lsDel();
       return;
@@ -361,12 +375,17 @@
     lmsSet("cmi.core.lesson_status", "passed");
   }
   let resultSent = false;
-  /* «Завершить» — так же, как «Пройти заново», после которого WebTutor корректно закрывает
-     курс, ставит «флажок» и уводит на опрос (в LMS включено «завершать курс»):
-     балл 100, completed → passed, прогресс → Commit, затем страница курса уходит БЕЗ
-     LMSFinish и без exit — попытку LMS закрывает сама. Наш LMSFinish с exit="logout"
-     WebTutor принимал за выход пользователя: «До свидания» / выкидывание из окна. */
+  /* «Завершить» — единственный путь к completed/passed (1.5). */
   function finishSession() {
+    if (MODE === "finish") finishLogout(); else finishLms();
+  }
+  /* Режим lms (WebTutor, «завершать курс»): результат → Commit → пауза → уход страницы
+     БЕЗ LMSFinish и без exit — попытку закрывает LMS: флажок и переход на опрос.
+     LMSFinish с exit="logout" WebTutor принимает за выход пользователя («До свидания»).
+     Пауза SAVE_WAIT: LMSCommit в WebTutor возвращается сразу, а на сервер статус уходит
+     в фоне; при раннем уходе LMS видит «В процессе», и «Завершить» срабатывает только
+     со второго нажатия. */
+  function finishLms() {
     lsSet(serialize(true));
     if (lmsReady) {
       writeResult(); resultSent = true;
@@ -375,24 +394,33 @@
       lmsCommit();
     }
     document.dispatchEvent(new CustomEvent("ku:completed"));
-    if (!lmsReady) {                             // без LMS — сразу сообщение на экране
-      document.querySelectorAll("[data-ku-complete]").forEach((b) => {
-        b.classList.add("is-completed");
-        if (b.dataset.kuLabel) b.innerHTML = b.dataset.kuLabel;
-      });
-      return;
-    }
-    // LMSCommit в WebTutor возвращается сразу, а на сервер статус уходит в фоне. Если страница
-    // уйдёт раньше, чем сервер записал passed, LMS увидит «В процессе» и окно не закроет —
-    // «Завершить» срабатывало только со второго нажатия. Ждём SAVE_WAIT, кнопка всё это время
-    // показывает «Сохраняем результат…».
-    document.querySelectorAll("[data-ku-complete]").forEach((b) => b.classList.add("is-completed"));
+    if (!lmsReady) { showDone(); return; }       // без LMS — сразу экран завершения
+    try { sessionStorage.setItem(FINISH_KEY, String(Date.now())); } catch (e) {}
     setTimeout(() => {
       reloading = true;                          // уход без LMSFinish (leave() пропускается)
       location.reload();
     }, SAVE_WAIT);
   }
   const SAVE_WAIT = 2000;                        // мс между сохранением результата и уходом страницы
+  /* Режим finish (LMS, которые закрывают попытку только по LMSFinish). */
+  function finishLogout() {
+    lsSet(serialize(true));
+    if (lmsReady) {
+      writeResult(); resultSent = true;
+      lmsSet("cmi.suspend_data", serialize(false));
+      lmsSet("cmi.core.session_time", sessionTime());
+      lmsSet("cmi.core.exit", "logout");
+      lmsCommit();
+    }
+    document.dispatchEvent(new CustomEvent("ku:completed"));
+    lmsFinish();
+    showDone();
+    setTimeout(() => {
+      try { if (window.parent !== window) window.parent.postMessage({ type: "ku:close-course", courseId: COURSE_ID }, "*"); } catch (e) {}
+      try { window.top.close(); } catch (e) {}
+      try { window.close(); } catch (e) {}
+    }, 400);
+  }
 
 
 
@@ -403,9 +431,9 @@
     // и закрыть её можно только завершением (или выбором «Выйти» на экране повторного входа).
   }
 
-  /* Повторный вход в уже пройденный курс — выбор на экране курса (gb-course.js):
-     restart() — пройти заново: прогресс обнуляется, статус в LMS не понижается;
-     exitCompleted() — выйти: отправляем passed и закрываем попытку и окно, как кнопка «Завершить». */
+  /* Повторный вход в пройденный курс (1.6) — встроенный экран выбора (или свой — 'ku:reentry'):
+     restart() — пройти заново: прогресс и выбор ролей обнуляются, статус в LMS не понижается;
+     exitCompleted() — выйти: то же, что «Завершить». */
   let reloading = false;
   function restart() {
     state.unlocked = 1; state.done = {}; state.vars = {}; state.completed = false;
@@ -423,6 +451,54 @@
     finishSession();
   }
 
+  /* ══ ЭКРАНЫ РАНТАЙМА: «Курс завершён» и повторный вход ══════════════ */
+  // Стили свои и с запасными цветами — работают в любом курсе; берут токены KU, если они есть.
+  function injectStyles() {
+    if (document.getElementById("ku-rt-style")) return;
+    const st = document.createElement("style");
+    st.id = "ku-rt-style";
+    st.textContent =
+      ".ku-rt{position:fixed;inset:0;z-index:2147483000;display:grid;place-items:center;padding:16px;" +
+      "background:rgba(30,20,12,.55);backdrop-filter:blur(4px);font-family:var(--ku-font-body,system-ui,sans-serif)}" +
+      ".ku-rt__card{width:min(100%,30rem);background:var(--ku-card,#fff);color:var(--ku-text,#2b1d14);" +
+      "border-radius:var(--ku-radius-l,18px);padding:28px 24px;box-shadow:0 20px 60px rgba(0,0,0,.25);text-align:center}" +
+      ".ku-rt__card h2{margin:0 0 .4em;font:700 1.5rem/1.2 var(--ku-font-display,inherit)}" +
+      ".ku-rt__card p{margin:0 0 1.2em;line-height:1.5;color:var(--ku-text-soft,#6b5a4c)}" +
+      ".ku-rt__row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}" +
+      ".ku-rt__btn{font:600 1rem/1 inherit;padding:.85em 1.3em;border-radius:var(--ku-radius-m,12px);border:0;cursor:pointer;" +
+      "background:var(--ku-surface-2,#efe6dc);color:var(--ku-text,#2b1d14)}" +
+      ".ku-rt__btn--main{background:var(--ku-brand,#b6531c);color:#fff}" +
+      ".ku-rt__btn:disabled{opacity:.6;cursor:default}";
+    document.head.appendChild(st);
+  }
+  function overlay(id, html) {
+    injectStyles();
+    let el = document.getElementById(id);
+    if (!el) { el = document.createElement("div"); el.id = id; el.className = "ku-rt"; document.body.appendChild(el); }
+    el.innerHTML = '<div class="ku-rt__card" role="dialog" aria-modal="true">' + html + "</div>";
+    document.body.style.overflow = "hidden";
+    return el;
+  }
+  function showDone() {
+    const r = document.getElementById("ku-reentry"); if (r) r.remove();
+    overlay("ku-done", "<h2>Курс завершён</h2><p>Результат сохранён. Окно можно закрыть.</p>");
+  }
+  function askReentry() {
+    const ev = new CustomEvent("ku:reentry", { cancelable: true, detail: state });
+    if (!document.dispatchEvent(ev)) return;     // курс показал свой экран
+    const el = overlay("ku-reentry",
+      "<h2>Курс уже пройден</h2><p>Можно пройти его ещё раз с начала или выйти — результат сохранится.</p>" +
+      '<div class="ku-rt__row"><button type="button" class="ku-rt__btn ku-rt__btn--main" data-ku-rt="restart">Пройти заново</button>' +
+      '<button type="button" class="ku-rt__btn" data-ku-rt="exit">Выйти из курса</button></div>');
+    el.addEventListener("click", (e) => {
+      const b = e.target.closest("[data-ku-rt]"); if (!b) return;
+      el.querySelectorAll("[data-ku-rt]").forEach((x) => { x.disabled = true; });
+      if (b.dataset.kuRt === "restart") { b.textContent = "Начинаем заново…"; restart(); }
+      else { b.textContent = "Сохраняем результат…"; setTimeout(exitCompleted, 30); }
+    });
+    const first = el.querySelector("[data-ku-rt]"); if (first) first.focus();
+  }
+
   /* ══ 7. ОТЧЁТ В LMS (cmi.interactions — опционально) ════════════════ */
   const lms = {
     interaction(id, response, result) {
@@ -435,7 +511,7 @@
       if (result) lmsSet("cmi.interactions." + i + ".result", result);
       lmsCommit();
     },
-    // id ученика в LMS (cmi.core.student_id) — для сборщика аналитики js/gb-log.js
+    // id ученика в LMS (cmi.core.student_id) — для аналитики курса
     learnerId() { return lmsGet("cmi.core.student_id"); },
   };
 
@@ -451,6 +527,8 @@
     renderReports();
     Object.keys(state.done).forEach(decorateDone);
     document.dispatchEvent(new CustomEvent("ku:ready", { detail: state }));
+    if (justFinished) showDone();                // вернулись после «Завершить»: LMS окно не закрыла
+    else if (state.completed) askReentry();      // повторный вход в пройденный курс
     // Сводки должны обновляться по мере ввода
     document.addEventListener("input", (e) => {
       if (e.target && e.target.hasAttribute &&
@@ -486,5 +564,6 @@
     save,
     get state() { return state; },
     get inLMS() { return lmsReady; },
+    mode: MODE,
   };
 })();

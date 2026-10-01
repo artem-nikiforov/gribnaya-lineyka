@@ -1417,9 +1417,3 @@ button.gb-half__disc:hover { transform: scale(1.04) rotate(-3deg); }
 .gb-markpack__box--side { width: min(100%, 16rem); }
 .gb-markpack__box--side img { width: 100%; display: block; border-radius: var(--ku-radius-m); box-shadow: var(--ku-shadow-s); }
 
-/* Повторный вход в пройденный курс */
-.gb-again { position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; padding: 16px;
-  background: color-mix(in srgb, var(--ku-contrast, #3d2314) 45%, transparent); backdrop-filter: blur(4px); }
-.gb-again__card { width: min(100%, 30rem); padding: var(--ku-space-l); text-align: center; display: grid; gap: var(--ku-space-s); justify-items: center; }
-.gb-again__card p { margin: 0; color: var(--ku-text-soft); }
-.gb-again__note { color: var(--ku-success) !important; font-weight: 700; }
