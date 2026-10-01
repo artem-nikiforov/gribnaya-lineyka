@@ -335,10 +335,6 @@
     // даём браузеру нарисовать «Сохраняем…», потом одним пакетом пишем в LMS
     requestAnimationFrame(() => setTimeout(finishSession, 30));
   }
-  /* Закрытие попытки (tools/SCORM_QA_PRINCIPLES.md, 1.5) — единственное место, где курс ставит
-     completed/passed: score.* → completed → passed → suspend_data → session_time → exit="logout"
-     → ОДИН LMSCommit → LMSFinish. WebTutor ставит «флажок» и закрывает окно по passed; сессию
-     закрываем сразу, не дожидаясь beforeunload — в iframe LMS он часто не приходит. */
   /* Результат — единственное место в коде, где пишутся passed и completed: сначала passed, затем completed. */
   function writeResult() {
     lmsSet("cmi.core.score.min", "0");
@@ -348,13 +344,14 @@
     lmsSet("cmi.core.lesson_status", "completed");
   }
   let resultSent = false;
+  /* «Завершить»: балл 100, passed, completed, прогресс — и одно сохранение. Больше ничего:
+     сессию (LMSFinish), выход и окно курс НЕ трогает — дальше всё делает LMS. Если ученик
+     закроет окно, время сеанса и LMSFinish отправит обработчик выхода (leave). */
   function finishSession() {
     try { localStorage.setItem(LS_KEY, serialize(true)); } catch (e) {}
     if (lmsReady) {
-      if (!resultSent) { writeResult(); resultSent = true; }
+      writeResult(); resultSent = true;
       lmsSet("cmi.suspend_data", serialize(false));
-      lmsSet("cmi.core.session_time", sessionTime());
-      lmsSet("cmi.core.exit", "logout");
       lmsCommit();
     }
     document.querySelectorAll("[data-ku-complete]").forEach((b) => {
@@ -362,26 +359,8 @@
       if (b.dataset.kuLabel) b.innerHTML = b.dataset.kuLabel;
     });
     document.dispatchEvent(new CustomEvent("ku:completed"));
-    lmsFinish();
-    // В окне, которое LMS открыла скриптом, закрываемся сами; во встроенном плеере — сообщение LMS.
-    setTimeout(() => {
-      try {
-        if (window.parent && window.parent !== window) {
-          window.parent.postMessage({ type: "ku:close-course", courseId: COURSE_ID }, "*");
-        }
-      } catch (e) {}
-      closeCourseWindow();
-    }, 400);
   }
-  /* Закрыть окно курса. Плеер LMS обычно держит курс во фрейме — закрывать нужно верхнее окно.
-     window.top.close() разрешён и для чужого домена (читать top.opener — нет, поэтому без проверок).
-     Браузер закроет окно, только если его открыл скрипт (window.open) — так LMS и открывают курс.
-     Если LMS открыла курс в той же вкладке — закрыть нельзя, остаётся сообщение «окно можно закрыть». */
-  function closeCourseWindow() {
-    try { window.top.close(); } catch (e) {}
-    try { window.close(); } catch (e) {}
-    try { if (window.parent !== window) window.parent.close(); } catch (e) {}
-  }
+
 
   function bindComplete() {
     document.querySelectorAll("[data-ku-complete]").forEach((btn) =>
@@ -448,11 +427,9 @@
   function leave() {
     if (!lmsReady || reloading) return;
     save();
-    if (!state.completed) {
-      lmsSet("cmi.core.session_time", sessionTime());
-      lmsSet("cmi.core.exit", "suspend");
-      lmsCommit();
-    }
+    lmsSet("cmi.core.session_time", sessionTime());
+    if (!state.completed) lmsSet("cmi.core.exit", "suspend");
+    lmsCommit();
     lmsFinish();
   }
   window.addEventListener("pagehide", leave);

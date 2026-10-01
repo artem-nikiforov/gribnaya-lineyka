@@ -10,5 +10,6 @@
     "organization": "ku-gribnaya-lineyka-2026-org",
     "item": "ku-gribnaya-lineyka-2026-item",
     "resource": "ku-gribnaya-lineyka-2026-res"
-  }
+  },
+  "complete_mode": "lms"
 }
