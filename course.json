@@ -3,7 +3,7 @@
   "title": "Коллекция Белые Грибы",
   "audience": "griby",
   "direction": "",
-  "_comment": "identifier — ключ прогресса (= data-ku-course на <html>), не менять. scorm_ids — точные id пакета, уже загруженного в LMS (ku-gribnaya-lineyka-2026.zip от 30.09): с ними LMS заменяет курс, а не заводит новый. Не менять. scorm_id — имя ZIP. Сборка: python3 tools/pack_scorm.py course",
+  "_comment": "identifier — ключ прогресса (= data-ku-course на <html>), не менять. scorm_ids — точные id пакета, загруженного в LMS (previous_zip — он сам; сборщик сверяет id с ним). complete_mode=lms — завершение для WebTutor (SCORM_QA_PRINCIPLES 1.5). Сборка: python3 tools/pack_scorm.py course",
   "scorm_id": "ku-gribnaya-lineyka-2026",
   "scorm_ids": {
     "manifest": "ku-gribnaya-lineyka-2026-manifest",
@@ -11,5 +11,6 @@
     "item": "ku-gribnaya-lineyka-2026-item",
     "resource": "ku-gribnaya-lineyka-2026-res"
   },
-  "complete_mode": "lms"
+  "complete_mode": "lms",
+  "previous_zip": "../ku-gribnaya-lineyka-2026.zip"
 }
