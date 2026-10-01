@@ -339,26 +339,15 @@
      completed/passed: score.* → completed → passed → suspend_data → session_time → exit="logout"
      → ОДИН LMSCommit → LMSFinish. WebTutor ставит «флажок» и закрывает окно по passed; сессию
      закрываем сразу, не дожидаясь beforeunload — в iframe LMS он часто не приходит. */
-  /* Результат «Пройден» — единственное место в коде, где пишутся completed и passed. */
+  /* Результат — единственное место в коде, где пишутся passed и completed: сначала passed, затем completed. */
   function writeResult() {
     lmsSet("cmi.core.score.min", "0");
     lmsSet("cmi.core.score.max", "100");
     lmsSet("cmi.core.score.raw", "100");
-    lmsSet("cmi.core.lesson_status", "completed");
     lmsSet("cmi.core.lesson_status", "passed");
+    lmsSet("cmi.core.lesson_status", "completed");
   }
-  /* «Пройден» отправляем заранее — когда ученик открыл финальный экран и всё выполнено
-     (gb-course.js). К нажатию «Завершить» статус уже лежит в LMS, и WebTutor по LMSFinish
-     закрывает окно, а не показывает «До свидания» (так было, когда passed и LMSFinish уходили
-     подряд). Повторно не пишем. */
   let resultSent = false;
-  function markPassed() {
-    if (resultSent || !lmsReady) return;
-    resultSent = true;
-    writeResult();
-    lmsSet("cmi.suspend_data", serialize(false));
-    lmsCommit();
-  }
   function finishSession() {
     try { localStorage.setItem(LS_KEY, serialize(true)); } catch (e) {}
     if (lmsReady) {
@@ -482,7 +471,6 @@
     complete,
     restart,
     exitCompleted,
-    markPassed,
     save,
     get state() { return state; },
     get inLMS() { return lmsReady; },

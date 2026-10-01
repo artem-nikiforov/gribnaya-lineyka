@@ -613,14 +613,7 @@
     const complete = $("[data-ku-complete]");
     if (complete && !complete.classList.contains("is-completed")) complete.disabled = !ok;
     const lock = $("#gb-final-lock"); if (lock) lock.hidden = ok;
-    sendPassedIfFinal();
     markCards();
-  }
-
-  // Финальный экран открыт и тренажёры пройдены — сразу отправляем «Пройден» в LMS (ku-scorm.js → markPassed).
-  function sendPassedIfFinal() {
-    const fin = document.getElementById("ku-page-finish");
-    if (fin && fin.classList.contains("active") && allTried() && window.KU && window.KU.markPassed) window.KU.markPassed();
   }
 
   /* ══ 6. ОТМЕТКИ НА ОГЛАВЛЕНИИ ═══════════════════════════════════════ */
@@ -641,7 +634,6 @@
         applyPosition();
       }
       orig(id);
-      if (id === "finish") sendPassedIfFinal();
       window.scrollTo({ top: 0, behavior: "auto" });
       setTimeout(() => document.dispatchEvent(new CustomEvent("gb:page", { detail: id })), 60);
       markCards();
