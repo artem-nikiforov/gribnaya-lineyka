@@ -374,17 +374,25 @@
       lmsSet("cmi.core.session_time", sessionTime());
       lmsCommit();
     }
-    document.querySelectorAll("[data-ku-complete]").forEach((b) => {
-      b.classList.add("is-completed");
-      if (b.dataset.kuLabel) b.innerHTML = b.dataset.kuLabel;
-    });
     document.dispatchEvent(new CustomEvent("ku:completed"));
-    if (!lmsReady) return;                       // без LMS — просто сообщение на экране
+    if (!lmsReady) {                             // без LMS — сразу сообщение на экране
+      document.querySelectorAll("[data-ku-complete]").forEach((b) => {
+        b.classList.add("is-completed");
+        if (b.dataset.kuLabel) b.innerHTML = b.dataset.kuLabel;
+      });
+      return;
+    }
+    // LMSCommit в WebTutor возвращается сразу, а на сервер статус уходит в фоне. Если страница
+    // уйдёт раньше, чем сервер записал passed, LMS увидит «В процессе» и окно не закроет —
+    // «Завершить» срабатывало только со второго нажатия. Ждём SAVE_WAIT, кнопка всё это время
+    // показывает «Сохраняем результат…».
+    document.querySelectorAll("[data-ku-complete]").forEach((b) => b.classList.add("is-completed"));
     setTimeout(() => {
       reloading = true;                          // уход без LMSFinish (leave() пропускается)
       location.reload();
-    }, 300);
+    }, SAVE_WAIT);
   }
+  const SAVE_WAIT = 2000;                        // мс между сохранением результата и уходом страницы
 
 
 
