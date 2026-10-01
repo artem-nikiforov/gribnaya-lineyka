@@ -139,7 +139,7 @@
       lmsSet("cmi.suspend_data", serialize(false));
       // Один раз помечаем попытку начатой. Никогда не понижаем completed.
       const status = lmsGet("cmi.core.lesson_status");
-      if (status === "" || status === "not attempted" || status === "unknown") {
+      if (!state.completed && (status === "" || status === "not attempted" || status === "unknown")) {
         lmsSet("cmi.core.lesson_status", "incomplete");
       }
       lmsCommit();
@@ -150,7 +150,24 @@
     saveTimer = setTimeout(save, 400);
   }
 
+  /* «Пройти заново»: метка в адресе (#ku-restart) и в sessionStorage переживает перезагрузку.
+     С ней курс стартует с нуля, что бы ни вернула LMS в suspend_data. */
+  const RESTART_KEY = "ku-restart::" + COURSE_ID;
+  function takeRestartMark() {
+    let mark = location.hash === "#ku-restart";
+    try { if (sessionStorage.getItem(RESTART_KEY)) mark = true; sessionStorage.removeItem(RESTART_KEY); } catch (e) {}
+    if (location.hash === "#ku-restart") {
+      try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {}
+    }
+    return mark;
+  }
+  let restarted = false;
   function load() {
+    restarted = takeRestartMark();
+    if (restarted) {                       // чистый старт: ни suspend_data, ни localStorage не читаем
+      try { localStorage.removeItem(LS_KEY); } catch (e) {}
+      return;
+    }
     let json = "";
     if (lmsReady) json = lmsGet("cmi.suspend_data");
     if (!json) { try { json = localStorage.getItem(LS_KEY) || ""; } catch (e) {} }
@@ -176,6 +193,13 @@
         }
       }
     } catch (e) {}
+    // Курс уже пройден (по нашим данным или по статусу в LMS) — в новой попытке WebTutor сразу
+    // подтверждаем «Пройден», чтобы статус не висел «В процессе».
+    if (lmsReady) {
+      const st = lmsGet("cmi.core.lesson_status");
+      if (st === "passed" || st === "completed") state.completed = true;
+      if (state.completed && st !== "passed") { writeResult(); lmsCommit(); }
+    }
   }
 
   /* ══ 3. ПЕРЕМЕННЫЕ ([data-ku-var]) ══════════════════════════════════ */
@@ -314,14 +338,18 @@
      completed/passed: score.* → completed → passed → suspend_data → session_time → exit="logout"
      → ОДИН LMSCommit → LMSFinish. WebTutor ставит «флажок» и закрывает окно по passed; сессию
      закрываем сразу, не дожидаясь beforeunload — в iframe LMS он часто не приходит. */
+  /* Результат «Пройден» — единственное место в коде, где пишутся completed и passed. */
+  function writeResult() {
+    lmsSet("cmi.core.score.min", "0");
+    lmsSet("cmi.core.score.max", "100");
+    lmsSet("cmi.core.score.raw", "100");
+    lmsSet("cmi.core.lesson_status", "completed");
+    lmsSet("cmi.core.lesson_status", "passed");
+  }
   function finishSession() {
     try { localStorage.setItem(LS_KEY, serialize(true)); } catch (e) {}
     if (lmsReady) {
-      lmsSet("cmi.core.score.min", "0");
-      lmsSet("cmi.core.score.max", "100");
-      lmsSet("cmi.core.score.raw", "100");
-      lmsSet("cmi.core.lesson_status", "completed");
-      lmsSet("cmi.core.lesson_status", "passed");
+      writeResult();
       lmsSet("cmi.suspend_data", serialize(false));
       lmsSet("cmi.core.session_time", sessionTime());
       lmsSet("cmi.core.exit", "logout");
@@ -367,8 +395,11 @@
   function restart() {
     state.unlocked = 1; state.done = {}; state.vars = {}; state.completed = false;
     try { localStorage.removeItem(LS_KEY); } catch (e) {}
+    try { sessionStorage.setItem(RESTART_KEY, "1"); } catch (e) {}
+    // статус в LMS не трогаем: уже полученный «Пройден» не понижаем
     if (lmsReady) { lmsSet("cmi.suspend_data", serialize(false)); lmsCommit(); }
     reloading = true;                    // перезагрузка без LMSFinish — сессия LMS остаётся открытой
+    location.hash = "ku-restart";
     location.reload();
   }
   function exitCompleted() {
