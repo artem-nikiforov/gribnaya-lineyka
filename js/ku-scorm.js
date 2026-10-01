@@ -103,7 +103,24 @@
   /* ══ 2. СОСТОЯНИЕ ═══════════════════════════════════════════════════ */
   const COURSE_ID =
     document.documentElement.getAttribute("data-ku-course") || location.pathname;
-  const LS_KEY = "ku::" + COURSE_ID;
+  /* Копия прогресса в localStorage — общая для всех, кто работает в этом браузере (общие
+     компьютеры ресторана!). Поэтому в LMS ключ привязан к ученику (cmi.core.student_id):
+     чужой прогресс не подхватывается и курс не засчитывается не тому человеку. Если LMS
+     не отдала id — localStorage не используем вовсе, прогресс только из suspend_data.
+     Вне LMS (просмотр в браузере) — общий ключ, как раньше. */
+  const LS_BASE = "ku::" + COURSE_ID;
+  let LS_KEY = LS_BASE;                 // уточняется в bindLearner() после LMSInitialize; "" — не использовать
+  const lsGet = () => { if (!LS_KEY) return ""; try { return localStorage.getItem(LS_KEY) || ""; } catch (e) { return ""; } };
+  const lsSet = (v) => { if (!LS_KEY) return; try { localStorage.setItem(LS_KEY, v); } catch (e) {} };
+  const lsDel = () => { if (!LS_KEY) return; try { localStorage.removeItem(LS_KEY); } catch (e) {} };
+  function bindLearner() {
+    if (!lmsReady) return;
+    const id = lmsGet("cmi.core.student_id").trim();
+    LS_KEY = id ? LS_BASE + "::" + id : "";
+    RESTART_KEY = "ku-restart::" + COURSE_ID + (id ? "::" + id : "");
+    // общий ключ без ученика мог остаться от предыдущих версий курса — это чужой прогресс, убираем
+    try { localStorage.removeItem(LS_BASE); } catch (e) {}
+  }
 
   const state = {
     unlocked: 1,      // до какой главы открыто (для последовательной навигации)
@@ -134,7 +151,7 @@
 
   let saveTimer = null;
   function save() {
-    try { localStorage.setItem(LS_KEY, serialize(true)); } catch (e) {}
+    lsSet(serialize(true));
     if (lmsReady) {
       lmsSet("cmi.suspend_data", serialize(false));
       // Один раз помечаем попытку начатой. Никогда не понижаем completed.
@@ -152,7 +169,7 @@
 
   /* «Пройти заново»: метка в адресе (#ku-restart) и в sessionStorage переживает перезагрузку.
      С ней курс стартует с нуля, что бы ни вернула LMS в suspend_data. */
-  const RESTART_KEY = "ku-restart::" + COURSE_ID;
+  let RESTART_KEY = "ku-restart::" + COURSE_ID;          // в LMS — с id ученика (bindLearner)
   function takeRestartMark() {
     let mark = location.hash === "#ku-restart";
     try { if (sessionStorage.getItem(RESTART_KEY)) mark = true; sessionStorage.removeItem(RESTART_KEY); } catch (e) {}
@@ -165,12 +182,12 @@
   function load() {
     restarted = takeRestartMark();
     if (restarted) {                       // чистый старт: ни suspend_data, ни localStorage не читаем
-      try { localStorage.removeItem(LS_KEY); } catch (e) {}
+      lsDel();
       return;
     }
     let json = "";
     if (lmsReady) json = lmsGet("cmi.suspend_data");
-    if (!json) { try { json = localStorage.getItem(LS_KEY) || ""; } catch (e) {} }
+    if (!json) json = lsGet();
     if (json) {
       try {
         const s = JSON.parse(json);
@@ -182,7 +199,7 @@
     }
     // localStorage может хранить более полные vars, чем обрезанный suspend_data
     try {
-      const local = JSON.parse(localStorage.getItem(LS_KEY) || "null");
+      const local = JSON.parse(lsGet() || "null");
       if (local && local.vars) {
         for (const k in local.vars) {
           const remote = state.vars[k];
@@ -350,7 +367,7 @@
      LMSFinish и без exit — попытку LMS закрывает сама. Наш LMSFinish с exit="logout"
      WebTutor принимал за выход пользователя: «До свидания» / выкидывание из окна. */
   function finishSession() {
-    try { localStorage.setItem(LS_KEY, serialize(true)); } catch (e) {}
+    lsSet(serialize(true));
     if (lmsReady) {
       writeResult(); resultSent = true;
       lmsSet("cmi.suspend_data", serialize(false));
@@ -384,7 +401,7 @@
   let reloading = false;
   function restart() {
     state.unlocked = 1; state.done = {}; state.vars = {}; state.completed = false;
-    try { localStorage.removeItem(LS_KEY); } catch (e) {}
+    lsDel();
     try { sessionStorage.setItem(RESTART_KEY, "1"); } catch (e) {}
     // статус в LMS не трогаем: уже полученный «Пройден» не понижаем
     if (lmsReady) { lmsSet("cmi.suspend_data", serialize(false)); lmsCommit(); }
@@ -418,6 +435,7 @@
   // На 'load', не DOMContentLoaded: LMS вставляет API в окно поздно.
   window.addEventListener("load", () => {
     lmsInit();
+    bindLearner();
     load();
     bindVars();
     bindComplete();

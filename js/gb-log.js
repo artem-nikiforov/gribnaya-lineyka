@@ -86,13 +86,17 @@
     }
     return h1.toString(16).padStart(8, "0") + h2.toString(16).padStart(8, "0");
   }
+  let learnerMemo = "";                 // id ученика этого сеанса: после LMSFinish LMS его уже не отдаёт
   function learner() {
     if (CFG.learner === "none") return "";
+    if (learnerMemo) return learnerMemo;
     let id = "";
     try { id = (window.KU && window.KU.lms && window.KU.lms.learnerId && window.KU.lms.learnerId()) || ""; } catch (_) {}
     if (!id) return "";
-    return CFG.learner === "raw" ? id : "h:" + fnv(CFG.course + "|" + id);
+    learnerMemo = CFG.learner === "raw" ? id : "h:" + fnv(CFG.course + "|" + id);
+    return learnerMemo;
   }
+  window.addEventListener("load", () => setTimeout(() => { learner(); backfill(); }, 0));   // сразу после LMSInitialize
   function role() {
     try {
       const v = window.KU && window.KU.vars;
@@ -105,7 +109,9 @@
   function track(type, data) {
     try {
       if (++count > SESSION_CAP) return;
-      const e = { id: rid(), ts: now(), sq: ++seq, t: cut(type, 40), p: page() };
+      // ученик, роль и сеанс — на момент события: очередь переживает выход и вход другого
+      // сотрудника на том же устройстве, и при отправке чужой id подставляться не должен
+      const e = { id: rid(), ts: now(), sq: ++seq, t: cut(type, 40), p: page(), s: session, l: learner(), r: role() };
       if (data) {
         const d = {};
         Object.keys(data).forEach((k) => {
@@ -132,14 +138,28 @@
     timer = setTimeout(() => { timer = null; idle(flush); }, wait);
   }
 
-  function envelope(events) {
-    return JSON.stringify({ k: CFG.token, cv: CFG.course, s: session, l: learner(), r: role(),
-      lms: !!(window.KU && window.KU.inLMS), ua: cut(navigator.userAgent, 200), ev: events });
+  // События текущего сеанса, записанные до подключения к LMS (id ещё не был известен),
+  // дописываем id этого же ученика. Чужие сеансы не трогаем: у старых событий без id так и
+  // остаётся пусто — лучше «неизвестно», чем под другим сотрудником.
+  function backfill() {
+    const l = learner(), r = role();
+    if (!l && !r) return;
+    queue.forEach((e) => { if (e.s === session) { if (!e.l && l) e.l = l; if (!e.r && r) e.r = r; } });
   }
-  function takeBatch() {                             // пачка не больше MAX_BATCH событий и MAX_BYTES байт
+  const groupKey = (e) => (e.s || "?") + "|" + (e.l || "");
+  function envelope(events) {
+    const e0 = events[0] || {};
+    return JSON.stringify({ k: CFG.token, cv: CFG.course, s: e0.s || "", l: e0.l || "", r: e0.r || "",
+      lms: !!(window.KU && window.KU.inLMS), ua: cut(navigator.userAgent, 200),
+      ev: events.map(({ s, l, r, ...rest }) => rest) });
+  }
+  function takeBatch() {                             // пачка: один сеанс и один ученик, не больше MAX_BATCH и MAX_BYTES
+    backfill();
     const out = [];
-    let bytes = 400;
+    let bytes = 400, key = null;
     for (let i = 0; i < queue.length && out.length < MAX_BATCH; i++) {
+      if (key === null) key = groupKey(queue[i]);
+      else if (groupKey(queue[i]) !== key) continue;
       const sz = JSON.stringify(queue[i]).length * 2;  // кириллица в UTF-8 — до 2 байт на символ
       if (out.length && bytes + sz > MAX_BYTES) break;
       if (sz > MAX_BYTES) { queue.splice(i, 1); i--; continue; }   // одно событие-монстр — выбросить
@@ -180,7 +200,11 @@
   // вкладку прячут или закрывают: остаток — через sendBeacon, пачками
   function beaconAll() {
     try {
-      if (!queue.length || !navigator.sendBeacon) return;
+      // без сети sendBeacon «принимает» пачку и теряет её — тогда оставляем очередь в localStorage
+      if (!queue.length || !navigator.sendBeacon || navigator.onLine === false) {
+        try { localStorage.setItem(LS_KEY, JSON.stringify(queue)); } catch (_) {}
+        return;
+      }
       for (let guard = 0; guard < 20 && queue.length; guard++) {
         const batch = takeBatch();
         if (!batch.length) break;
